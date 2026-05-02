@@ -1,22 +1,142 @@
-[gd_scene format=3 uid="uid://ckavqb25bdaul"]
+[gd_scene load_steps=21 format=3 uid="uid://c1n6kovp848dv"]
 
-[ext_resource type="Script" uid="uid://b2fpql3h8o53t" path="res://scripts/main.gd" id="1_mainscript"]
-[ext_resource type="Shader" uid="uid://bkwhcrvk2u3ku" path="res://scripts/sky.gdshader" id="1_o5qli"]
+[ext_resource type="Script" path="res://scripts/sim_constants.gd" id="1_const"]
+[ext_resource type="Script" path="res://scripts/sim_controller.gd" id="2_ctrl"]
+[ext_resource type="Script" path="res://scripts/argus_drone.gd" id="3_argus"]
+[ext_resource type="Script" path="res://scripts/hcm_target.gd" id="4_hcm"]
+[ext_resource type="Script" path="res://scripts/orbit_camera.gd" id="5_cam"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="6_hud"]
+[ext_resource type="Shader" uid="uid://bkwhcrvk2u3ku" path="res://scripts/sky.gdshader" id="7_sky"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_0wfyh"]
-shader = ExtResource("1_o5qli")
+[sub_resource type="ShaderMaterial" id="sky_mat"]
+shader = ExtResource("7_sky")
 
-[sub_resource type="Sky" id="Sky_sugp2"]
-sky_material = SubResource("ShaderMaterial_0wfyh")
+[sub_resource type="Sky" id="sky_res"]
+sky_material = SubResource("sky_mat")
 
-[sub_resource type="Environment" id="Environment_0wfyh"]
+[sub_resource type="Environment" id="env"]
 background_mode = 2
-sky = SubResource("Sky_sugp2")
+sky = SubResource("sky_res")
+ambient_light_source = 3
+ambient_light_color = Color(0.4, 0.55, 0.8, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.6
 
-[node name="Node3D" type="Node3D" unique_id=2108259764]
-script = ExtResource("1_mainscript")
+[sub_resource type="BoxMesh" id="m_argus_body"]
+size = Vector3(2, 0.6, 6)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=928909968]
-environment = SubResource("Environment_0wfyh")
+[sub_resource type="StandardMaterial3D" id="mat_argus"]
+albedo_color = Color(0.85, 0.92, 1, 1)
+metallic = 0.1
+roughness = 0.4
 
-[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=56351955]
+[sub_resource type="BoxMesh" id="m_argus_wing"]
+size = Vector3(28, 0.2, 2.5)
+
+[sub_resource type="StandardMaterial3D" id="mat_wing"]
+albedo_color = Color(0.05, 0.1, 0.18, 1)
+metallic = 0.4
+
+[sub_resource type="BoxMesh" id="m_hcm_body"]
+size = Vector3(2.5, 2.5, 9)
+
+[sub_resource type="StandardMaterial3D" id="mat_hcm"]
+albedo_color = Color(1, 0.25, 0.3, 1)
+emission_enabled = true
+emission = Color(0.7, 0.1, 0.1, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="SphereMesh" id="m_truth"]
+radius = 8.0
+height = 16.0
+
+[sub_resource type="StandardMaterial3D" id="mat_truth"]
+transparency = 1
+albedo_color = Color(1, 0.4, 0.4, 0.55)
+emission_enabled = true
+emission = Color(1, 0.3, 0.3, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="SphereMesh" id="m_estimate"]
+radius = 9.0
+height = 18.0
+
+[sub_resource type="StandardMaterial3D" id="mat_estimate"]
+transparency = 1
+albedo_color = Color(0.2, 1, 0.7, 0.45)
+emission_enabled = true
+emission = Color(0.2, 1, 0.7, 1)
+emission_energy_multiplier = 1.4
+
+[node name="Main" type="Node3D"]
+
+[node name="Constants" type="Node" parent="."]
+script = ExtResource("1_const")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 200, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Argus" type="Node3D" parent="."]
+script = ExtResource("3_argus")
+
+[node name="Body" type="MeshInstance3D" parent="Argus"]
+mesh = SubResource("m_argus_body")
+surface_material_override/0 = SubResource("mat_argus")
+
+[node name="Wing" type="MeshInstance3D" parent="Argus"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+mesh = SubResource("m_argus_wing")
+surface_material_override/0 = SubResource("mat_wing")
+
+[node name="HCM" type="Node3D" parent="."]
+script = ExtResource("4_hcm")
+
+[node name="Body" type="MeshInstance3D" parent="HCM"]
+mesh = SubResource("m_hcm_body")
+surface_material_override/0 = SubResource("mat_hcm")
+
+[node name="TruthMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("m_truth")
+surface_material_override/0 = SubResource("mat_truth")
+
+[node name="EstimateMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("m_estimate")
+surface_material_override/0 = SubResource("mat_estimate")
+
+[node name="BearingLines" type="Node3D" parent="."]
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 110, 220)
+fov = 55.0
+near = 0.1
+far = 5000.0
+script = ExtResource("5_cam")
+controller_path = NodePath("../Controller")
+argus_path = NodePath("../Argus")
+hcm_path = NodePath("../HCM")
+
+[node name="HUD" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_hud")
+
+[node name="Controller" type="Node3D" parent="."]
+script = ExtResource("2_ctrl")
+argus_path = NodePath("../Argus")
+hcm_path = NodePath("../HCM")
+hud_path = NodePath("../HUD")
+truth_marker_path = NodePath("../TruthMarker")
+estimate_marker_path = NodePath("../EstimateMarker")
+bearing_lines_path = NodePath("../BearingLines")

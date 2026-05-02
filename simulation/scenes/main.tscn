@@ -1,6 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://sim_main_001"]
+[gd_scene format=3 uid="uid://ckavqb25bdaul"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_mainscript"]
+[ext_resource type="Script" uid="uid://b2fpql3h8o53t" path="res://scripts/main.gd" id="1_mainscript"]
+[ext_resource type="Shader" uid="uid://bkwhcrvk2u3ku" path="res://scripts/sky.gdshader" id="1_o5qli"]
 
-[node name="SimulationMain" type="Node3D"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0wfyh"]
+shader = ExtResource("1_o5qli")
+
+[sub_resource type="Sky" id="Sky_sugp2"]
+sky_material = SubResource("ShaderMaterial_0wfyh")
+
+[sub_resource type="Environment" id="Environment_0wfyh"]
+background_mode = 2
+sky = SubResource("Sky_sugp2")
+
+[node name="Node3D" type="Node3D" unique_id=2108259764]
 script = ExtResource("1_mainscript")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=928909968]
+environment = SubResource("Environment_0wfyh")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=56351955]

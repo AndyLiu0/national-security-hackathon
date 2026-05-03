@@ -86,7 +86,7 @@ void sky() {
         float shadow_ray_dist = (5250.0 - water_alt) / sun_dir.y;
         vec2 shadow_hit = pos_water + (sun_dir.xz * shadow_ray_dist) * scale;
         float shadow_n = get_cloud_noise(shadow_hit);
-        float shadow_mask = smoothstep(0.4, 0.6, shadow_n); 
+        float shadow_mask = smoothstep(0.4, 0.6, shadow_n);
         vec3 water_base = vec3(0.01, 0.05, 0.15);
         vec3 water_shadow = water_base * 0.2;
         vec3 current_water = mix(water_base, water_shadow, shadow_mask * 0.9);

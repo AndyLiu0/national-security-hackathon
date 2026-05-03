@@ -184,16 +184,35 @@ emission_enabled = true
 emission = Color(1, 0.3, 0.3, 1)
 emission_energy_multiplier = 1.2
 
-[sub_resource type="SphereMesh" id="m_estimate"]
-radius = 9.0
-height = 18.0
-
+; ----- estimate vector arrow (always-on-top) -----
 [sub_resource type="StandardMaterial3D" id="mat_estimate"]
-transparency = 1
-albedo_color = Color(0.2, 1, 0.7, 0.45)
+albedo_color = Color(0.15, 1.0, 0.95, 1)
 emission_enabled = true
-emission = Color(0.2, 1, 0.7, 1)
-emission_energy_multiplier = 1.4
+emission = Color(0.15, 1.0, 0.95, 1)
+emission_energy_multiplier = 2.5
+no_depth_test = true
+shading_mode = 0
+render_priority = 8
+
+[sub_resource type="CylinderMesh" id="m_arrow_shaft"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 4.5
+radial_segments = 12
+rings = 1
+
+[sub_resource type="CylinderMesh" id="m_arrow_tip"]
+top_radius = 0.0
+bottom_radius = 0.7
+height = 1.6
+radial_segments = 14
+rings = 1
+
+[sub_resource type="SphereMesh" id="m_arrow_origin"]
+radius = 0.55
+height = 1.1
+radial_segments = 14
+rings = 8
 
 [node name="Main" type="Node3D"]
 
@@ -391,10 +410,25 @@ surface_material_override/0 = SubResource("mat_truth")
 visible = false
 layers = 2
 
-[node name="EstimateMarker" type="MeshInstance3D" parent="."]
-mesh = SubResource("m_estimate")
+; ----- Predicted-state vector arrow (cyan, always on top) -----
+[node name="EstimateMarker" type="Node3D" parent="."]
+
+[node name="Origin" type="MeshInstance3D" parent="EstimateMarker"]
+mesh = SubResource("m_arrow_origin")
 surface_material_override/0 = SubResource("mat_estimate")
-layers = 2
+
+[node name="Shaft" type="MeshInstance3D" parent="EstimateMarker"]
+; rotate the cylinder so its length lies along -Z (forward) and offset
+; by half its height so the tail sits at the origin.
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -2.25)
+mesh = SubResource("m_arrow_shaft")
+surface_material_override/0 = SubResource("mat_estimate")
+
+[node name="Tip" type="MeshInstance3D" parent="EstimateMarker"]
+; arrowhead at the front of the shaft (length 1.6, sits at -Z 5.3)
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -5.3)
+mesh = SubResource("m_arrow_tip")
+surface_material_override/0 = SubResource("mat_estimate")
 
 [node name="BearingLines" type="Node3D" parent="."]
 
@@ -417,8 +451,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_hud")
-eo_viewport_path = NodePath("../GimbalView/EOViewport_F")
-ir_viewport_path = NodePath("../GimbalView/IRViewport_F")
+eo_paths = [NodePath("../GimbalView/EOViewport_F"), NodePath("../GimbalView/EOViewport_R"), NodePath("../GimbalView/EOViewport_B"), NodePath("../GimbalView/EOViewport_L")]
+ir_paths = [NodePath("../GimbalView/IRViewport_F"), NodePath("../GimbalView/IRViewport_R"), NodePath("../GimbalView/IRViewport_B"), NodePath("../GimbalView/IRViewport_L")]
 
 [node name="Controller" type="Node3D" parent="."]
 script = ExtResource("2_ctrl")

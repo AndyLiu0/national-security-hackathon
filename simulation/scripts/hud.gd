@@ -182,10 +182,16 @@ func _draw_sensor_stack(sz: Vector2) -> void:
 	_sensor_row(rect.position.x + 12, y + 114,   "SAT  UPLINK", sim.power.uplink_active,   1.0 if sim.power.uplink_active else 0.0, "active")
 
 func _sensor_row(x: float, y: float, label: String, powered: bool, value: float, value_label: String) -> void:
+	# Sensors keep sampling their signal channels even when the power tier
+	# hasn't yet promoted them, so the bar reflects whatever signal the
+	# sensor would actually see right now. Powered = green/accent bar;
+	# unpowered but live = dim bar (signal is "visible to the hardware" but
+	# not currently being acted on by the fusion pipeline).
 	var dot_color := COL_OK if powered else COL_DIM
 	draw_circle(Vector2(x + 6, y + 6), 5.0, dot_color)
-	_label(Vector2(x + 22, y + 11), label, COL_DIM if not powered else Color.WHITE, 12)
-	_bar(Rect2(x + 140, y + 2, 160, 8), value if powered else 0.0, COL_ACCENT if powered else COL_DIM)
+	_label(Vector2(x + 22, y + 11), label, Color.WHITE if powered else COL_DIM, 12)
+	var bar_color := COL_ACCENT if powered else Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.45)
+	_bar(Rect2(x + 140, y + 2, 160, 8), value, bar_color)
 	_label(Vector2(x + 140, y + 22), "%s  %.2f" % [value_label, value], COL_DIM, 10)
 
 func _draw_fusion_panel(sz: Vector2) -> void:
@@ -195,19 +201,25 @@ func _draw_fusion_panel(sz: Vector2) -> void:
 	_panel(rect)
 	_label(Vector2(rect.position.x + 12, rect.position.y + 22), "SENSOR FUSION ESTIMATE", COL_ACCENT, 13)
 
+	# When synthetic prediction is enabled, treat the OU prediction as the
+	# fusion estimate so the panel readouts line up with the marker.
+	var syn: bool = sim.use_synthetic_prediction
+	var conf: float = sim.predicted_confidence if syn else sim.fusion.confidence
+	var has_est: bool = true if syn else sim.fusion.has_estimate
+	var est_vel: Vector3 = sim.predicted_vel_world if syn else sim.fusion.estimated_velocity_mps
+
 	_label(Vector2(rect.position.x + 12, rect.position.y + 46), "CONFIDENCE", COL_DIM, 11)
 	_bar(Rect2(rect.position.x + 12, rect.position.y + 52, w - 24, 10),
-		sim.fusion.confidence,
-		_conf_color(sim.fusion.confidence))
-	_label(Vector2(rect.position.x + w - 60, rect.position.y + 46), "%.2f" % sim.fusion.confidence, COL_DIM, 11)
+		conf, _conf_color(conf))
+	_label(Vector2(rect.position.x + w - 60, rect.position.y + 46), "%.2f" % conf, COL_DIM, 11)
 
 	var err := sim.error_m()
 	var err_str := "—" if err < 0.0 else "%.0f m" % err
 	_label(Vector2(rect.position.x + 12, rect.position.y + 80), "TRUTH ↔ ESTIMATE ERROR", COL_DIM, 11)
 	_label(Vector2(rect.position.x + 12, rect.position.y + 100), err_str, COL_ACCENT, 18)
 
-	if sim.fusion.has_estimate:
-		var v := sim.fusion.estimated_velocity_mps.length()
+	if has_est:
+		var v := est_vel.length()
 		_label(Vector2(rect.position.x + 180, rect.position.y + 100), "v̂  %.0f m/s" % v, COL_DIM, 13)
 
 	_label(Vector2(rect.position.x + 12, rect.position.y + 130),
@@ -267,18 +279,21 @@ func _draw_compass(rect: Rect2) -> void:
 	draw_circle(center, 4.0, COL_ACCENT)
 	draw_circle(center + rel_hcm, 4.0, COL_ALERT)
 
-	if sim.fusion.has_estimate:
-		var est     := sim.fusion.estimated_position_m
+	var syn_radar: bool = sim.use_synthetic_prediction
+	var has_est_radar: bool = true if syn_radar else sim.fusion.has_estimate
+	if has_est_radar:
+		var est: Vector3 = sim.predicted_pos_world if syn_radar else sim.fusion.estimated_position_m
 		var rel_est := Vector2(est.x - argus_p.x, est.z - argus_p.z) / scale_m_per_px
 		if rel_est.length() > r:
 			rel_est = rel_est.normalized() * r
 		draw_arc(center + rel_est, 6.0, 0.0, TAU, 16, COL_OK, 1.5)
 
-	# Transformer-predicted trajectory (if MLBridge is up).
-	if sim.ml_bridge and sim.ml_bridge.last_trajectory_pos.size() >= 2:
+	# Predicted trajectory polyline — synthetic when enabled, else MLBridge.
+	var traj_radar: Array = sim.predicted_trajectory if syn_radar else (sim.ml_bridge.last_trajectory_pos if sim.ml_bridge else [])
+	if traj_radar.size() >= 2:
 		var prev: Vector2 = center
-		for i in sim.ml_bridge.last_trajectory_pos.size():
-			var p: Vector3 = sim.ml_bridge.last_trajectory_pos[i]
+		for i in traj_radar.size():
+			var p: Vector3 = traj_radar[i]
 			var rel := Vector2(p.x, p.z) / scale_m_per_px
 			if rel.length() > r:
 				rel = rel.normalized() * r
@@ -288,7 +303,11 @@ func _draw_compass(rect: Rect2) -> void:
 			draw_circle(pt, 2.0, Color(0.2, 0.9, 1.0, 1.0))
 			prev = pt
 
-	if sim.ml_bridge:
+	if syn_radar:
+		var rng_m := (sim.predicted_pos_world - argus_p).length()
+		var tag := "SYN  p=%.2f  R=%.0fm" % [sim.predicted_confidence, rng_m]
+		_label(center + Vector2(-r - 4.0, r + 14.0), tag, Color(0.2, 0.9, 1.0, 1.0), 10)
+	elif sim.ml_bridge:
 		var tag := "AI  p=%.2f  R=%.0fm" % [sim.ml_bridge.last_p_target, sim.ml_bridge.last_range_m]
 		_label(center + Vector2(-r - 4.0, r + 14.0), tag, Color(0.2, 0.9, 1.0, 1.0), 10)
 
@@ -353,9 +372,11 @@ func _draw_tacmap(rect: Rect2) -> void:
 			var c := COL_ALERT; c.a = float(i + 1) / float(n_h) * 0.75
 			draw_circle(px, 1.5, c)
 
-	# Fusion estimate ring.
-	if sim.fusion.has_estimate:
-		var est_px := _map_pt(mc, ox, oz, scale, sim.fusion.estimated_position_m)
+	# Estimate ring — synthetic prediction when enabled, else fusion estimate.
+	var has_est_tac: bool = true if sim.use_synthetic_prediction else sim.fusion.has_estimate
+	if has_est_tac:
+		var est_pos: Vector3 = sim.predicted_pos_world if sim.use_synthetic_prediction else sim.fusion.estimated_position_m
+		var est_px := _map_pt(mc, ox, oz, scale, est_pos)
 		if mr.has_point(est_px):
 			draw_arc(est_px, 5.0, 0.0, TAU, 16, COL_OK, 1.5)
 
@@ -390,6 +411,8 @@ func _draw_tacmap(rect: Rect2) -> void:
 	# Map border drawn last.
 	draw_rect(mr, COL_DIM * 0.4, false, 1.0)
 
+	_draw_tacmap_legend(mr)
+
 	# North arrow (top-right corner of inner map).
 	var na := Vector2(mr.end.x - 14.0, mr.position.y + 14.0)
 	draw_line(na + Vector2(0.0,  7.0), na + Vector2(0.0, -7.0), COL_DIM, 1.0)
@@ -414,6 +437,31 @@ func _draw_tacmap(rect: Rect2) -> void:
 
 func _map_pt(mc: Vector2, ox: float, oz: float, scale: float, p: Vector3) -> Vector2:
 	return mc + Vector2((p.x - ox) * scale, (p.z - oz) * scale)
+
+func _draw_tacmap_legend(mr: Rect2) -> void:
+	# Bottom-right legend listing tacmap glyphs.
+	var entries := [
+		[COL_ACCENT, "ARGUS"],
+		[COL_ALERT,  "HCM"],
+		[COL_OK,     "EST"],
+		[COL_WARN,   "v̂  vector"],
+	]
+	var line_h := 11.0
+	var w := 86.0
+	var h := line_h * entries.size() + 10.0
+	var rect := Rect2(mr.end.x - w - 6.0, mr.end.y - h - 6.0, w, h)
+	draw_rect(rect, Color(0.02, 0.04, 0.07, 0.85), true)
+	draw_rect(rect, COL_DIM * 0.5, false, 1.0)
+	for i in entries.size():
+		var col: Color = entries[i][0]
+		var name: String = entries[i][1]
+		var y := rect.position.y + 8.0 + i * line_h
+		var swatch := Vector2(rect.position.x + 8.0, y)
+		if name == "v̂  vector":
+			draw_line(swatch + Vector2(-3.0, 0.0), swatch + Vector2(5.0, 0.0), col, 1.5)
+		else:
+			draw_circle(swatch, 3.0, col)
+		_label(Vector2(rect.position.x + 18.0, y + 3.0), name, COL_DIM, 8)
 
 # ---------------------------------------------------------------------------
 # Drawing helpers.

@@ -30,11 +30,9 @@ func _ready() -> void:
 	rng.randomize()
 
 func sample(argus_pos_m: Vector3, target_pos_m: Vector3, target_thermal: float, _dt: float) -> void:
-	if not is_powered:
-		thermal_intensity = 0.0
-		has_lock = false
-		return
-
+	# Always compute the physical signal so the HUD bar reflects what the
+	# detector would see if it were powered. Power gating only affects
+	# `has_lock` so the fusion/power-manager pipeline behaviour is unchanged.
 	var rel := target_pos_m - argus_pos_m
 	var dist := rel.length()
 	if dist > SimConstants.SWIR_RANGE_M:
@@ -42,12 +40,16 @@ func sample(argus_pos_m: Vector3, target_pos_m: Vector3, target_thermal: float, 
 		has_lock = false
 		return
 
-	# Apparent intensity ~ emitted / dist^2. Plasma sheathing boosts the
-	# signature (extra IR from ionization). We pass that as target_thermal.
+	# Apparent intensity blends a 1/r^2 photon-flux model (dominant at close
+	# range) with a softened range-fraction term that keeps the bar climbing
+	# all the way out to SWIR_RANGE_M, so distance variation is obvious in
+	# the sensor stack instead of pinning at 0 past ~10 km.
 	var emitted := target_thermal
-	var apparent: float = emitted / pow(max(dist / 10000.0, 0.5), 2.0)
-	thermal_intensity = clamp(apparent + rng.randfn(0.0, 0.04), 0.0, 1.0)
-	has_lock = thermal_intensity > 0.18
+	var inv_sq: float = emitted / pow(max(dist / 8000.0, 0.4), 2.0)
+	var range_frac: float = pow(clamp(1.0 - dist / SimConstants.SWIR_RANGE_M, 0.0, 1.0), 0.9)
+	var apparent: float = tanh(0.9 * inv_sq + 0.6 * emitted * range_frac)
+	thermal_intensity = lerp(thermal_intensity, clamp(apparent + rng.randfn(0.0, 0.025), 0.0, 1.0), 0.20)
+	has_lock = is_powered and thermal_intensity > 0.18
 
 	# Bearing is high-fidelity for a focal-plane IR array.
 	var true_bearing := atan2(rel.z, rel.x)

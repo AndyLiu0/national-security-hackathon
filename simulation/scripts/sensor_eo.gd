@@ -25,11 +25,9 @@ func _ready() -> void:
 	rng.randomize()
 
 func sample(argus_pos_m: Vector3, target_pos_m: Vector3, _dt: float) -> void:
-	if not is_powered:
-		has_visual = false
-		classification_conf = 0.0
-		return
-
+	# Always compute the physical signal so the HUD bar reflects what the
+	# sensor would see if powered. `has_visual` (used by fusion) stays
+	# gated by `is_powered` so pipeline behaviour is unchanged.
 	var rel := target_pos_m - argus_pos_m
 	var dist := rel.length()
 	if dist > SimConstants.EO_RANGE_M:
@@ -37,10 +35,9 @@ func sample(argus_pos_m: Vector3, target_pos_m: Vector3, _dt: float) -> void:
 		classification_conf = 0.0
 		return
 
-	# Visual confidence rolls off with distance and lighting.
 	var vis: float = (1.0 - dist / SimConstants.EO_RANGE_M) * night_factor
 	classification_conf = clamp(vis + rng.randfn(0.0, 0.05), 0.0, 1.0)
-	has_visual = classification_conf > 0.25
+	has_visual = is_powered and classification_conf > 0.25
 
 	var true_bearing := atan2(rel.z, rel.x)
 	bearing_rad = true_bearing + rng.randfn(0.0, bearing_noise_rad)

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#cfd8dc"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="500" fill="#0f1720"/>
+
+  <!-- Section: Feature Extraction -->
+  <rect x="220" y="40" width="240" height="420" rx="12" ry="12" fill="#1B2631" stroke="#85929E" stroke-dasharray="6 5"/>
+  <text x="340" y="68" text-anchor="middle" fill="#cfd8dc" font-size="14" font-style="italic">Feature Extraction</text>
+
+  <!-- Section: Cross-Modal Fusion -->
+  <rect x="540" y="40" width="380" height="420" rx="12" ry="12" fill="#1B2631" stroke="#85929E" stroke-dasharray="6 5"/>
+  <text x="730" y="68" text-anchor="middle" fill="#cfd8dc" font-size="14" font-style="italic">Cross-Modal Fusion</text>
+
+  <!-- Inputs -->
+  <g>
+    <rect x="40" y="110" width="150" height="60" rx="10" fill="#FFE5B4" stroke="#E67E22" stroke-width="2"/>
+    <text x="115" y="146" text-anchor="middle" font-size="16" fill="#000">360° Camera</text>
+  </g>
+  <g>
+    <rect x="40" y="220" width="150" height="60" rx="10" fill="#FADBD8" stroke="#C0392B" stroke-width="2"/>
+    <text x="115" y="256" text-anchor="middle" font-size="16" fill="#000">IR</text>
+  </g>
+  <g>
+    <rect x="40" y="330" width="150" height="60" rx="10" fill="#D6EAF8" stroke="#2874A6" stroke-width="2"/>
+    <text x="115" y="358" text-anchor="middle" font-size="14" fill="#000">Air Pressure</text>
+    <text x="115" y="376" text-anchor="middle" font-size="14" fill="#000">Sensors</text>
+  </g>
+
+  <!-- Encoders -->
+  <g>
+    <rect x="260" y="110" width="160" height="60" rx="10" fill="#A9DFBF" stroke="#1E8449" stroke-width="2"/>
+    <text x="340" y="146" text-anchor="middle" font-size="18" fill="#000" font-weight="bold">CNN</text>
+  </g>
+  <g>
+    <rect x="260" y="220" width="160" height="60" rx="10" fill="#A9DFBF" stroke="#1E8449" stroke-width="2"/>
+    <text x="340" y="256" text-anchor="middle" font-size="18" fill="#000" font-weight="bold">CNN</text>
+  </g>
+  <g>
+    <rect x="260" y="330" width="160" height="60" rx="10" fill="#D2B4DE" stroke="#6C3483" stroke-width="2"/>
+    <text x="340" y="366" text-anchor="middle" font-size="18" fill="#000" font-weight="bold">MLP</text>
+  </g>
+
+  <!-- Transformer -->
+  <g>
+    <rect x="570" y="180" width="200" height="140" rx="12" fill="#F9E79F" stroke="#B7950B" stroke-width="2"/>
+    <text x="670" y="240" text-anchor="middle" font-size="18" fill="#000" font-weight="bold">Transformer</text>
+    <text x="670" y="266" text-anchor="middle" font-size="12" fill="#000" font-style="italic">cross-modal</text>
+    <text x="670" y="282" text-anchor="middle" font-size="12" fill="#000" font-style="italic">dependencies</text>
+  </g>
+
+  <!-- MLP Head -->
+  <g>
+    <rect x="810" y="210" width="100" height="80" rx="10" fill="#D2B4DE" stroke="#6C3483" stroke-width="2"/>
+    <text x="860" y="246" text-anchor="middle" font-size="14" fill="#000" font-weight="bold">MLP</text>
+    <text x="860" y="266" text-anchor="middle" font-size="14" fill="#000" font-weight="bold">Head</text>
+  </g>
+
+  <!-- Output -->
+  <g>
+    <rect x="950" y="210" width="130" height="80" rx="10" fill="#ABEBC6" stroke="#117A65" stroke-width="3"/>
+    <text x="1015" y="245" text-anchor="middle" font-size="14" fill="#000" font-weight="bold">Pose +</text>
+    <text x="1015" y="265" text-anchor="middle" font-size="14" fill="#000" font-weight="bold">Velocity</text>
+  </g>
+
+  <!-- Arrows: inputs -> encoders -->
+  <line x1="190" y1="140" x2="258" y2="140" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="190" y1="250" x2="258" y2="250" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="190" y1="360" x2="258" y2="360" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Arrows: encoders -> transformer -->
+  <path d="M420,140 C500,140 500,230 568,230" fill="none" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="420" y1="250" x2="568" y2="250" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M420,360 C500,360 500,275 568,275" fill="none" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Arrow: transformer -> head -->
+  <line x1="770" y1="250" x2="808" y2="250" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Arrow: head -> output -->
+  <line x1="910" y1="250" x2="948" y2="250" stroke="#cfd8dc" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>

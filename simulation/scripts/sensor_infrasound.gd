@@ -14,7 +14,7 @@ class_name SensorInfrasound
 # ---------------------------------------------------------------------------
 
 @export var bearing_noise_rad: float = deg_to_rad(8.0)
-@export var detection_floor: float = 0.05
+@export var detection_floor: float = 0.02
 var rng := RandomNumberGenerator.new()
 
 # Latest measurement, consumed by the fusion node.
@@ -36,16 +36,20 @@ func sample(argus_pos_m: Vector3, target_pos_m: Vector3, target_speed_mps: float
 	var rel := target_pos_m - argus_pos_m
 	var dist := rel.length()
 
-	# Quadratic range falloff so the signal varies with distance instead
-	# of pinning at 1 for any supersonic target.
-	var range_factor: float = pow(clamp(1.0 - dist / SimConstants.INFRASOUND_RANGE_M, 0.0, 1.0), 1.8)
+	# Range falloff designed so the bar sweeps smoothly across the full
+	# INFRASOUND_RANGE_M band: a linear horizon model gives gradient at long
+	# range, a 1/r^2 acoustic-pressure term dominates at close range, and a
+	# tanh saturator joins them without pinning at 1 too early. Result —
+	# noticeable bar movement from ~150 km in to ~5 km.
+	var lin_factor: float = clamp(1.0 - dist / SimConstants.INFRASOUND_RANGE_M, 0.0, 1.0)
+	var inv_sq: float = 1.0 / pow(max(dist / 10000.0, 0.5), 2.0)
+	var range_factor: float = tanh(1.5 * lin_factor + 0.6 * inv_sq)
 
-	# Soft mach-saturating shock term: mach=1 -> ~0.04, mach=5 -> ~0.5,
-	# mach=8 -> ~0.65. Encodes "louder when faster" without saturating.
+	# Mach-saturating shock term — Mach-5 cruise → ~0.75.
 	var mach: float = max(target_speed_mps, 1.0) / 340.0
-	var shock: float = 1.0 - exp(-(mach * mach) / 90.0)
-	var raw: float = range_factor * shock + rng.randfn(0.0, 0.04)
-	anomaly_score = clamp(raw, 0.0, 1.0)
+	var shock: float = 1.0 - exp(-(mach * mach) / 18.0)
+	var raw: float = range_factor * shock + rng.randfn(0.0, 0.012)
+	anomaly_score = lerp(anomaly_score, clamp(raw, 0.0, 1.0), 0.22)
 	if anomaly_score < detection_floor:
 		anomaly_score = 0.0
 

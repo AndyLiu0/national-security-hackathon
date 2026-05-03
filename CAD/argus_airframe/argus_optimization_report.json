@@ -1,0 +1,1467 @@
+{
+  "title": "ARGUS HAPS Design Optimization Report",
+  "search_params": {
+    "altitude_range_ft": [
+      55000,
+      75000
+    ],
+    "min_endurance_days": 7,
+    "min_range_km": 8000,
+    "min_coverage_km": 25,
+    "coverage_target_km2": 500000
+  },
+  "n_feasible": 46335,
+  "optimal_designs": {
+    "cots_minimal": {
+      "design": {
+        "design_inputs": {
+          "wingspan_m": 8.0,
+          "chord_m": 0.30000000000000004,
+          "sensor_tier": "cots_minimal",
+          "altitude_ft": 55000,
+          "altitude_m": 16764.0,
+          "coverage_target_km2": 500000
+        },
+        "mass_breakdown": {
+          "structural_kg": 1.9193865262115763,
+          "payload_kg": 1.1,
+          "power_system_kg": 4.0137244080645855,
+          "battery_kg": 2.106934370846992,
+          "solar_panels_kg": 0.4224000000000001,
+          "propulsion_kg": 0.8999999999999999,
+          "total_mass_kg": 7.933110934276161
+        },
+        "aerodynamics": {
+          "wing_area_m2": 2.4000000000000004,
+          "aspect_ratio": 26.666666666666664,
+          "CL_cruise": 0.9,
+          "CD_total": 0.01839641160519639,
+          "CD_induced": 0.01039641160519639,
+          "L_over_D": 48.92258443194319,
+          "LD_best": 49.34302692916284,
+          "V_cruise_ms": 22.163173455594485,
+          "V_cruise_kmh": 79.78742444014014,
+          "V_cruise_kts": 43.08520919767568,
+          "V_stall_ms": 18.440874997188075,
+          "V_stall_kts": 35.849060994533616,
+          "drag_N": 1.5902112132249273,
+          "power_required_W": 42.980642621628554,
+          "prop_efficiency": 0.82,
+          "reynolds": 68588.03269870664,
+          "mach": 0.07511103622616194,
+          "rho_kg_m3": 0.1466481392157258,
+          "temperature_K": 216.65,
+          "pressure_Pa": 9120.211393154912,
+          "wing_loading_N_m2": 32.41551764317471,
+          "wing_loading_kg_m2": 3.3054628892817335
+        },
+        "structure": {
+          "wing_mass_kg": 1.1198308713233907,
+          "skin_mass_kg": 0.5760000000000001,
+          "spar_mass_kg": 0.20383087132339056,
+          "rib_mass_kg": 0.34,
+          "fuselage_mass_kg": 0.20156955683821032,
+          "tail_mass_kg": 0.11198308713233907,
+          "systems_mass_kg": 0.0860030109176364,
+          "total_structural_kg": 1.9193865262115763,
+          "material": "carbon_fiber_composite",
+          "flutter_margin": 1.5,
+          "bending_rigidity_Nm2": 24494.40000000001,
+          "n_ribs": 17
+        },
+        "power": {
+          "solar_area_m2": 1.9200000000000004,
+          "solar_cell_type": "GaAs_multijunction",
+          "solar_efficiency": 0.3,
+          "peak_irradiance_W_m2": 1323.371072,
+          "avg_irradiance_W_m2": 759.5883127704874,
+          "peak_solar_power_W": 762.2617374720002,
+          "avg_solar_power_W": 437.52286815580084,
+          "usable_solar_avg_W": 399.0208557580903,
+          "usable_solar_peak_W": 695.1827045744641,
+          "day_hours": 12.5,
+          "night_hours": 11.5,
+          "day_energy_Wh": 4987.760696976129,
+          "night_consumption_Wh": 586.2773901487284,
+          "day_surplus_Wh": 4350.502664205772,
+          "energy_feasible": true,
+          "power_margin_pct": 307.6515157261597,
+          "battery_energy_Wh": 732.8467376859104,
+          "battery_mass_kg": 2.106934370846992,
+          "battery_chemistry": "Li-S",
+          "battery_specific_energy_Wh_kg": 400,
+          "solar_mass_kg": 0.4224000000000001,
+          "electronics_mass_kg": 1.5,
+          "power_system_mass_kg": 4.029334370846993,
+          "cruise_power_W": 42.980642621628554,
+          "payload_power_W": 8.0,
+          "total_power_W": 50.980642621628554
+        },
+        "payload": {
+          "sensor_tier": "cots_minimal",
+          "sensor_description": "COTS minimal - MEMS infrasound + thermal module",
+          "sensor_components": [
+            "MEMS infrasound x3 ($150)",
+            "FLIR Lepton 3.5 ($250)",
+            "RPi Zero 2W ($15)",
+            "GPS + IMU ($50)"
+          ],
+          "sensor_mass_kg": 0.8,
+          "sensor_cost_usd": 800,
+          "detection_range_km": 30,
+          "detection_probability": 0.35,
+          "comms_mass_kg": 0.3,
+          "comms_power_W": 3.0,
+          "comms_cost_usd": 400,
+          "comms_range_km": 200,
+          "mesh_capable": true,
+          "satellite_link": false,
+          "bandwidth_mbps": 1.0,
+          "relay_architecture": "mesh_relay",
+          "total_payload_mass_kg": 1.1,
+          "always_on_power_W": 8.0,
+          "peak_power_W": 15.0,
+          "payload_cost_usd": 1200
+        },
+        "cost": {
+          "airframe_cost_usd": 383.8773052423153,
+          "tooling_per_unit_usd": 190.0,
+          "solar_cost_usd": 76.80000000000001,
+          "battery_cost_usd": 109.92701065288655,
+          "power_electronics_cost_usd": 200,
+          "payload_cost_usd": 1200,
+          "ait_cost_usd": 500,
+          "propulsion_cost_usd": 300,
+          "recovery_cost_usd": 200,
+          "per_unit_cost_usd": 3160.6043158952016,
+          "production_run": 200
+        },
+        "fleet": {
+          "coverage_per_node_km2": 2827.4333882308138,
+          "effective_coverage_km2": 1884.9555921538758,
+          "overlap_factor": 1.5,
+          "nodes_active": 266,
+          "total_fleet_size": 415,
+          "fleet_cost_usd": 1311650.7910965087,
+          "cost_per_km2_usd": 2.6233015821930175,
+          "node_density_per_km2": 0.000532,
+          "annual_maintenance_usd": 131165.0791096509,
+          "expected_lifetime_years": 3.0,
+          "spares_fraction": 0.2,
+          "failure_tolerance": "graceful_degradation",
+          "detection_fusion": true,
+          "single_node_pd": 0.35,
+          "avg_overlap_nodes": 2,
+          "swarm_detection_pd": 0.8274999999999999,
+          "swarm_fusion_boost": 0.25
+        },
+        "mission": {
+          "battery_only_range_km": 1146.9442263270146,
+          "solar_endurance_days": 30,
+          "endurance_limited_by": "maintenance_cycle",
+          "transit_range_km": 500,
+          "operational_radius_km": 159.57484888028029,
+          "max_wind_ms": 17.73053876447559,
+          "max_wind_kts": 34.46816735814055,
+          "deployment_method": "conventional_runway",
+          "climb_time_hours": 2.328333333333333,
+          "design_recoverable": true,
+          "weather_tolerance": "fair_weather_only",
+          "altitude_band": "55000 ft (16.8 km)"
+        },
+        "feasibility": {
+          "energy_feasible": true,
+          "power_margin_ok": true,
+          "stall_margin_ok": true,
+          "wing_loading_ok": true,
+          "mass_reasonable": true,
+          "aspect_ratio_ok": true,
+          "span_structural_ok": true,
+          "all_feasible": true
+        },
+        "n_motors": 2
+      },
+      "sensitivity": {
+        "wingspan": [
+          {
+            "wingspan_m": 6.4,
+            "mass": 7.991492873365191,
+            "cost": 3089.703639188989,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 7.2,
+            "mass": 7.9057615315735195,
+            "cost": 3121.607090738077,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 8.0,
+            "mass": 7.933110934276161,
+            "cost": 3160.6043158952016,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 8.8,
+            "mass": 7.994984968686035,
+            "cost": 3198.3751518632757,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 9.6,
+            "mass": 8.14337711131607,
+            "cost": 3245.825014292866,
+            "feasible": true
+          }
+        ],
+        "chord": [
+          {
+            "chord_m": 0.24000000000000005,
+            "mass": 7.555130408271074,
+            "cost": 3106.7218636053353,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.2700000000000001,
+            "mass": 7.739956086893507,
+            "cost": 3133.440701528769,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.30000000000000004,
+            "mass": 7.933110934276161,
+            "cost": 3160.6043158952016,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.33000000000000007,
+            "mass": 8.138559635345448,
+            "cost": 3188.245442225572,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.36000000000000004,
+            "mass": 8.345922671753712,
+            "cost": 3216.1572045127077,
+            "feasible": true
+          }
+        ],
+        "altitude": [
+          {
+            "alt_ft": 55000,
+            "mass": 7.933110934276161,
+            "power_W": 42.980642621628554,
+            "feasible": true
+          },
+          {
+            "alt_ft": 58000,
+            "mass": 8.145274460771109,
+            "power_W": 48.05916076589996,
+            "feasible": true
+          },
+          {
+            "alt_ft": 61000,
+            "mass": 8.388580151329547,
+            "power_W": 53.98340464634263,
+            "feasible": true
+          },
+          {
+            "alt_ft": 64000,
+            "mass": 8.683151513260578,
+            "power_W": 61.10174837416727,
+            "feasible": true
+          },
+          {
+            "alt_ft": 67000,
+            "mass": 9.04505955749207,
+            "power_W": 69.88320733294202,
+            "feasible": true
+          },
+          {
+            "alt_ft": 70000,
+            "mass": 9.507879381744054,
+            "power_W": 81.0919075393108,
+            "feasible": true
+          },
+          {
+            "alt_ft": 73000,
+            "mass": 10.112173917688759,
+            "power_W": 95.73721726454914,
+            "feasible": true
+          },
+          {
+            "alt_ft": 76000,
+            "mass": 10.959436455093396,
+            "power_W": 116.23183303671546,
+            "feasible": true
+          },
+          {
+            "alt_ft": 79000,
+            "mass": 12.291794397986337,
+            "power_W": 148.51225856359073,
+            "feasible": false
+          }
+        ]
+      }
+    },
+    "cots_standard": {
+      "design": {
+        "design_inputs": {
+          "wingspan_m": 8.0,
+          "chord_m": 0.30000000000000004,
+          "sensor_tier": "cots_standard",
+          "altitude_ft": 55000,
+          "altitude_m": 16764.0,
+          "coverage_target_km2": 500000
+        },
+        "mass_breakdown": {
+          "structural_kg": 1.9193865262115763,
+          "payload_kg": 1.8,
+          "power_system_kg": 4.711513422127516,
+          "battery_kg": 2.803154540352801,
+          "solar_panels_kg": 0.4224000000000001,
+          "propulsion_kg": 0.8999999999999999,
+          "total_mass_kg": 9.330899948339091
+        },
+        "aerodynamics": {
+          "wing_area_m2": 2.4000000000000004,
+          "aspect_ratio": 26.666666666666664,
+          "CL_cruise": 0.9,
+          "CD_total": 0.01839641160519639,
+          "CD_induced": 0.01039641160519639,
+          "L_over_D": 48.92258443194319,
+          "LD_best": 49.34302692916284,
+          "V_cruise_ms": 24.036539768567472,
+          "V_cruise_kmh": 86.53154316684291,
+          "V_cruise_kts": 46.727033310095166,
+          "V_stall_ms": 19.99960998929985,
+          "V_stall_kts": 38.8792418191989,
+          "drag_N": 1.8704013911136097,
+          "power_required_W": 54.826801732544155,
+          "prop_efficiency": 0.82,
+          "reynolds": 74385.51067216955,
+          "mach": 0.08145987815895235,
+          "rho_kg_m3": 0.1466481392157258,
+          "temperature_K": 216.65,
+          "pressure_Pa": 9120.211393154912,
+          "wing_loading_N_m2": 38.127029157658136,
+          "wing_loading_kg_m2": 3.887874978474621
+        },
+        "structure": {
+          "wing_mass_kg": 1.1198308713233907,
+          "skin_mass_kg": 0.5760000000000001,
+          "spar_mass_kg": 0.20383087132339056,
+          "rib_mass_kg": 0.34,
+          "fuselage_mass_kg": 0.20156955683821032,
+          "tail_mass_kg": 0.11198308713233907,
+          "systems_mass_kg": 0.0860030109176364,
+          "total_structural_kg": 1.9193865262115763,
+          "material": "carbon_fiber_composite",
+          "flutter_margin": 1.5,
+          "bending_rigidity_Nm2": 24494.40000000001,
+          "n_ribs": 17
+        },
+        "power": {
+          "solar_area_m2": 1.9200000000000004,
+          "solar_cell_type": "GaAs_multijunction",
+          "solar_efficiency": 0.3,
+          "peak_irradiance_W_m2": 1323.371072,
+          "avg_irradiance_W_m2": 759.5883127704874,
+          "peak_solar_power_W": 762.2617374720002,
+          "avg_solar_power_W": 437.52286815580084,
+          "usable_solar_avg_W": 399.0208557580903,
+          "usable_solar_peak_W": 695.1827045744641,
+          "day_hours": 12.5,
+          "night_hours": 11.5,
+          "day_energy_Wh": 4987.760696976129,
+          "night_consumption_Wh": 780.0082199242578,
+          "day_surplus_Wh": 4139.925675319328,
+          "energy_feasible": true,
+          "power_margin_pct": 206.4030104109849,
+          "battery_energy_Wh": 975.0102749053221,
+          "battery_mass_kg": 2.803154540352801,
+          "battery_chemistry": "Li-S",
+          "battery_specific_energy_Wh_kg": 400,
+          "solar_mass_kg": 0.4224000000000001,
+          "electronics_mass_kg": 1.5,
+          "power_system_mass_kg": 4.725554540352801,
+          "cruise_power_W": 54.826801732544155,
+          "payload_power_W": 13.0,
+          "total_power_W": 67.82680173254415
+        },
+        "payload": {
+          "sensor_tier": "cots_standard",
+          "sensor_description": "COTS standard - infrasound array + SWIR + edge AI",
+          "sensor_components": [
+            "MEMS infrasound x6 ($300)",
+            "SWIR InGaAs module ($800)",
+            "RPi CM4 + Coral TPU ($120)",
+            "EO cam 12MP ($80)",
+            "GPS/INS + LoRa radio ($200)"
+          ],
+          "sensor_mass_kg": 1.5,
+          "sensor_cost_usd": 2500,
+          "detection_range_km": 50,
+          "detection_probability": 0.52,
+          "comms_mass_kg": 0.3,
+          "comms_power_W": 3.0,
+          "comms_cost_usd": 400,
+          "comms_range_km": 200,
+          "mesh_capable": true,
+          "satellite_link": false,
+          "bandwidth_mbps": 1.0,
+          "relay_architecture": "mesh_relay",
+          "total_payload_mass_kg": 1.8,
+          "always_on_power_W": 13.0,
+          "peak_power_W": 28.0,
+          "payload_cost_usd": 2900
+        },
+        "cost": {
+          "airframe_cost_usd": 383.8773052423153,
+          "tooling_per_unit_usd": 190.0,
+          "solar_cost_usd": 76.80000000000001,
+          "battery_cost_usd": 146.25154123579833,
+          "power_electronics_cost_usd": 200,
+          "payload_cost_usd": 2900,
+          "ait_cost_usd": 500,
+          "propulsion_cost_usd": 300,
+          "recovery_cost_usd": 200,
+          "per_unit_cost_usd": 4896.928846478113,
+          "production_run": 200
+        },
+        "fleet": {
+          "coverage_per_node_km2": 7853.981633974483,
+          "effective_coverage_km2": 5235.987755982988,
+          "overlap_factor": 1.5,
+          "nodes_active": 96,
+          "total_fleet_size": 150,
+          "fleet_cost_usd": 734539.326971717,
+          "cost_per_km2_usd": 1.469078653943434,
+          "node_density_per_km2": 0.000192,
+          "annual_maintenance_usd": 73453.9326971717,
+          "expected_lifetime_years": 3.0,
+          "spares_fraction": 0.2,
+          "failure_tolerance": "graceful_degradation",
+          "detection_fusion": true,
+          "single_node_pd": 0.52,
+          "avg_overlap_nodes": 2,
+          "swarm_detection_pd": 0.9896,
+          "swarm_fusion_boost": 0.22
+        },
+        "mission": {
+          "battery_only_range_km": 1243.8909330233666,
+          "solar_endurance_days": 30,
+          "endurance_limited_by": "maintenance_cycle",
+          "transit_range_km": 500,
+          "operational_radius_km": 173.06308633368582,
+          "max_wind_ms": 19.22923181485398,
+          "max_wind_kts": 37.381626648076136,
+          "deployment_method": "conventional_runway",
+          "climb_time_hours": 2.328333333333333,
+          "design_recoverable": true,
+          "weather_tolerance": "fair_weather_only",
+          "altitude_band": "55000 ft (16.8 km)"
+        },
+        "feasibility": {
+          "energy_feasible": true,
+          "power_margin_ok": true,
+          "stall_margin_ok": true,
+          "wing_loading_ok": true,
+          "mass_reasonable": true,
+          "aspect_ratio_ok": true,
+          "span_structural_ok": true,
+          "all_feasible": true
+        },
+        "n_motors": 2
+      },
+      "sensitivity": {
+        "wingspan": [
+          {
+            "wingspan_m": 6.4,
+            "mass": 9.646125543540066,
+            "cost": 4839.478496566621,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 7.2,
+            "mass": 9.399103939376811,
+            "cost": 4862.995199626126,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 8.0,
+            "mass": 9.330899948339091,
+            "cost": 4896.928846478113,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 8.8,
+            "mass": 9.321877643513355,
+            "cost": 4931.1220955133085,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 9.6,
+            "mass": 9.424134992564692,
+            "cost": 4976.129686590661,
+            "feasible": true
+          }
+        ],
+        "chord": [
+          {
+            "chord_m": 0.24000000000000005,
+            "mass": 8.925226593167206,
+            "cost": 4841.761267531359,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.2700000000000001,
+            "mass": 9.120090240934672,
+            "cost": 4869.009112949418,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.30000000000000004,
+            "mass": 9.330899948339091,
+            "cost": 4896.928846478113,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.33000000000000007,
+            "mass": 9.54613888857904,
+            "cost": 4925.251873268388,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.36000000000000004,
+            "mass": 9.774685283318234,
+            "cost": 4954.117342850525,
+            "feasible": true
+          }
+        ],
+        "altitude": [
+          {
+            "alt_ft": 55000,
+            "mass": 9.330899948339091,
+            "power_W": 54.826801732544155,
+            "feasible": true
+          },
+          {
+            "alt_ft": 58000,
+            "mass": 9.60777221655728,
+            "power_W": 61.56751796275183,
+            "feasible": true
+          },
+          {
+            "alt_ft": 61000,
+            "mass": 9.942443812857057,
+            "power_W": 69.65740665585601,
+            "feasible": true
+          },
+          {
+            "alt_ft": 64000,
+            "mass": 10.347674329829,
+            "power_W": 79.48802316231756,
+            "feasible": true
+          },
+          {
+            "alt_ft": 67000,
+            "mass": 10.864008528563375,
+            "power_W": 91.9900446255863,
+            "feasible": true
+          },
+          {
+            "alt_ft": 70000,
+            "mass": 11.551433045776662,
+            "power_W": 108.59399713755825,
+            "feasible": true
+          },
+          {
+            "alt_ft": 73000,
+            "mass": 12.49835303200889,
+            "power_W": 131.55070684615546,
+            "feasible": false
+          },
+          {
+            "alt_ft": 76000,
+            "mass": 13.989154908972806,
+            "power_W": 167.6215960720778,
+            "feasible": false
+          },
+          {
+            "alt_ft": 79000,
+            "mass": 17.375471952949958,
+            "power_W": 249.5998307450618,
+            "feasible": false
+          }
+        ]
+      }
+    },
+    "cots_enhanced": {
+      "design": {
+        "design_inputs": {
+          "wingspan_m": 8.0,
+          "chord_m": 0.30000000000000004,
+          "sensor_tier": "cots_enhanced",
+          "altitude_ft": 55000,
+          "altitude_m": 16764.0,
+          "coverage_target_km2": 500000
+        },
+        "mass_breakdown": {
+          "structural_kg": 1.9193865262115763,
+          "payload_kg": 2.8,
+          "power_system_kg": 5.8713227809390025,
+          "battery_kg": 3.9644083676722084,
+          "solar_panels_kg": 0.4224000000000001,
+          "propulsion_kg": 0.8999999999999999,
+          "total_mass_kg": 11.490709307150578
+        },
+        "aerodynamics": {
+          "wing_area_m2": 2.4000000000000004,
+          "aspect_ratio": 26.666666666666664,
+          "CL_cruise": 0.9,
+          "CD_total": 0.01839641160519639,
+          "CD_induced": 0.01039641160519639,
+          "L_over_D": 48.92258443194319,
+          "LD_best": 49.34302692916284,
+          "V_cruise_ms": 26.673720780804558,
+          "V_cruise_kmh": 96.02539481089642,
+          "V_cruise_kts": 51.85371319788406,
+          "V_stall_ms": 22.19387722675389,
+          "V_stall_kts": 43.14489732880956,
+          "drag_N": 2.3033403843111806,
+          "power_required_W": 74.9251930173994,
+          "prop_efficiency": 0.82,
+          "reynolds": 82546.75427124753,
+          "mach": 0.0903972895338151,
+          "rho_kg_m3": 0.1466481392157258,
+          "temperature_K": 216.65,
+          "pressure_Pa": 9120.211393154912,
+          "wing_loading_N_m2": 46.95223517790341,
+          "wing_loading_kg_m2": 4.787795544646073
+        },
+        "structure": {
+          "wing_mass_kg": 1.1198308713233907,
+          "skin_mass_kg": 0.5760000000000001,
+          "spar_mass_kg": 0.20383087132339056,
+          "rib_mass_kg": 0.34,
+          "fuselage_mass_kg": 0.20156955683821032,
+          "tail_mass_kg": 0.11198308713233907,
+          "systems_mass_kg": 0.0860030109176364,
+          "total_structural_kg": 1.9193865262115763,
+          "material": "carbon_fiber_composite",
+          "flutter_margin": 1.5,
+          "bending_rigidity_Nm2": 24494.40000000001,
+          "n_ribs": 17
+        },
+        "power": {
+          "solar_area_m2": 1.9200000000000004,
+          "solar_cell_type": "GaAs_multijunction",
+          "solar_efficiency": 0.3,
+          "peak_irradiance_W_m2": 1323.371072,
+          "avg_irradiance_W_m2": 759.5883127704874,
+          "peak_solar_power_W": 762.2617374720002,
+          "avg_solar_power_W": 437.52286815580084,
+          "usable_solar_avg_W": 399.0208557580903,
+          "usable_solar_peak_W": 695.1827045744641,
+          "day_hours": 12.5,
+          "night_hours": 11.5,
+          "day_energy_Wh": 4987.760696976129,
+          "night_consumption_Wh": 1103.139719700093,
+          "day_surplus_Wh": 3788.6957842586366,
+          "energy_feasible": true,
+          "power_margin_pct": 116.65149251908136,
+          "battery_energy_Wh": 1378.9246496251162,
+          "battery_mass_kg": 3.9644083676722084,
+          "battery_chemistry": "Li-S",
+          "battery_specific_energy_Wh_kg": 400,
+          "solar_mass_kg": 0.4224000000000001,
+          "electronics_mass_kg": 1.5,
+          "power_system_mass_kg": 5.8868083676722085,
+          "cruise_power_W": 74.9251930173994,
+          "payload_power_W": 21.0,
+          "total_power_W": 95.9251930173994
+        },
+        "payload": {
+          "sensor_tier": "cots_enhanced",
+          "sensor_description": "COTS enhanced - full COTS suite + onboard ML",
+          "sensor_components": [
+            "MEMS infrasound x8 precision ($500)",
+            "SWIR InGaAs array ($1500)",
+            "Jetson Orin Nano ($250)",
+            "EO cam stabilized ($300)",
+            "Multi-band radio + GPS/INS ($400)"
+          ],
+          "sensor_mass_kg": 2.5,
+          "sensor_cost_usd": 5000,
+          "detection_range_km": 75,
+          "detection_probability": 0.65,
+          "comms_mass_kg": 0.3,
+          "comms_power_W": 3.0,
+          "comms_cost_usd": 400,
+          "comms_range_km": 200,
+          "mesh_capable": true,
+          "satellite_link": false,
+          "bandwidth_mbps": 1.0,
+          "relay_architecture": "mesh_relay",
+          "total_payload_mass_kg": 2.8,
+          "always_on_power_W": 21.0,
+          "peak_power_W": 43.0,
+          "payload_cost_usd": 5400
+        },
+        "cost": {
+          "airframe_cost_usd": 383.8773052423153,
+          "tooling_per_unit_usd": 190.0,
+          "solar_cost_usd": 76.80000000000001,
+          "battery_cost_usd": 206.83869744376742,
+          "power_electronics_cost_usd": 200,
+          "payload_cost_usd": 5400,
+          "ait_cost_usd": 500,
+          "propulsion_cost_usd": 300,
+          "recovery_cost_usd": 200,
+          "per_unit_cost_usd": 7457.516002686083,
+          "production_run": 200
+        },
+        "fleet": {
+          "coverage_per_node_km2": 17671.458676442588,
+          "effective_coverage_km2": 11780.972450961724,
+          "overlap_factor": 1.5,
+          "nodes_active": 43,
+          "total_fleet_size": 68,
+          "fleet_cost_usd": 507111.08818265365,
+          "cost_per_km2_usd": 1.0142221763653072,
+          "node_density_per_km2": 8.6e-05,
+          "annual_maintenance_usd": 50711.10881826537,
+          "expected_lifetime_years": 3.0,
+          "spares_fraction": 0.2,
+          "failure_tolerance": "graceful_degradation",
+          "detection_fusion": true,
+          "single_node_pd": 0.65,
+          "avg_overlap_nodes": 2,
+          "swarm_detection_pd": 0.99,
+          "swarm_fusion_boost": 0.18
+        },
+        "mission": {
+          "battery_only_range_km": 1380.365050406636,
+          "solar_endurance_days": 30,
+          "endurance_limited_by": "maintenance_cycle",
+          "transit_range_km": 500,
+          "operational_radius_km": 192.05078962179283,
+          "max_wind_ms": 21.33897662464365,
+          "max_wind_kts": 41.48297055830725,
+          "deployment_method": "conventional_runway",
+          "climb_time_hours": 2.328333333333333,
+          "design_recoverable": true,
+          "weather_tolerance": "fair_weather_only",
+          "altitude_band": "55000 ft (16.8 km)"
+        },
+        "feasibility": {
+          "energy_feasible": true,
+          "power_margin_ok": true,
+          "stall_margin_ok": true,
+          "wing_loading_ok": true,
+          "mass_reasonable": true,
+          "aspect_ratio_ok": true,
+          "span_structural_ok": true,
+          "all_feasible": true
+        },
+        "n_motors": 2
+      },
+      "sensitivity": {
+        "wingspan": [
+          {
+            "wingspan_m": 6.4,
+            "mass": 12.329453088809228,
+            "cost": 7427.295975829192,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 7.2,
+            "mass": 11.749356729791389,
+            "cost": 7433.485453075016,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 8.0,
+            "mass": 11.490709307150578,
+            "cost": 7457.516002686083,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 8.8,
+            "mass": 11.358715618105002,
+            "cost": 7485.214077434808,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 9.6,
+            "mass": 11.376429574056171,
+            "cost": 7525.757929369393,
+            "feasible": true
+          }
+        ],
+        "chord": [
+          {
+            "chord_m": 0.24000000000000005,
+            "mass": 11.052081985560797,
+            "cost": 7400.463649463025,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.2700000000000001,
+            "mass": 11.263746248689676,
+            "cost": 7428.58392129706,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.30000000000000004,
+            "mass": 11.490709307150578,
+            "cost": 7457.516002686083,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.33000000000000007,
+            "mass": 11.73568203245926,
+            "cost": 7487.245123609713,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.36000000000000004,
+            "mass": 11.987553329813878,
+            "cost": 7517.4903559295635,
+            "feasible": true
+          }
+        ],
+        "altitude": [
+          {
+            "alt_ft": 55000,
+            "mass": 11.490709307150578,
+            "power_W": 74.9251930173994,
+            "feasible": true
+          },
+          {
+            "alt_ft": 58000,
+            "mass": 11.902534779757989,
+            "power_W": 84.89395901425306,
+            "feasible": true
+          },
+          {
+            "alt_ft": 61000,
+            "mass": 12.409090734746442,
+            "power_W": 97.12645186563527,
+            "feasible": false
+          },
+          {
+            "alt_ft": 64000,
+            "mass": 13.042567864252808,
+            "power_W": 112.48179193126091,
+            "feasible": false
+          },
+          {
+            "alt_ft": 67000,
+            "mass": 13.89025878369194,
+            "power_W": 132.99067435419522,
+            "feasible": false
+          },
+          {
+            "alt_ft": 70000,
+            "mass": 15.099274776350297,
+            "power_W": 162.2879049853876,
+            "feasible": false
+          },
+          {
+            "alt_ft": 73000,
+            "mass": 17.065428037921198,
+            "power_W": 209.889050607917,
+            "feasible": false
+          }
+        ]
+      }
+    },
+    "mil_standard": {
+      "design": {
+        "design_inputs": {
+          "wingspan_m": 12.0,
+          "chord_m": 0.30000000000000004,
+          "sensor_tier": "mil_standard",
+          "altitude_ft": 55000,
+          "altitude_m": 16764.0,
+          "coverage_target_km2": 500000
+        },
+        "mass_breakdown": {
+          "structural_kg": 2.9254930561619217,
+          "payload_kg": 6.3,
+          "power_system_kg": 7.630001472939339,
+          "battery_kg": 5.5119631056177845,
+          "solar_panels_kg": 0.6336000000000002,
+          "propulsion_kg": 0.8999999999999999,
+          "total_mass_kg": 17.755494529101263
+        },
+        "aerodynamics": {
+          "wing_area_m2": 3.6000000000000005,
+          "aspect_ratio": 39.99999999999999,
+          "CL_cruise": 0.9,
+          "CD_total": 0.014930941070130928,
+          "CD_induced": 0.006930941070130928,
+          "L_over_D": 60.277513371239095,
+          "LD_best": 60.43261917042926,
+          "V_cruise_ms": 27.072660593149223,
+          "V_cruise_kmh": 97.4615781353372,
+          "V_cruise_kts": 52.62925219308209,
+          "V_stall_ms": 22.525815215038353,
+          "V_stall_kts": 43.79018477803456,
+          "drag_N": 2.888671258739941,
+          "power_required_W": 95.37075189396532,
+          "prop_efficiency": 0.82,
+          "reynolds": 83781.34718497148,
+          "mach": 0.09174929730278893,
+          "rho_kg_m3": 0.1466481392157258,
+          "temperature_K": 216.65,
+          "pressure_Pa": 9120.211393154912,
+          "wing_loading_N_m2": 48.36720011772524,
+          "wing_loading_kg_m2": 4.932081813639239
+        },
+        "structure": {
+          "wing_mass_kg": 1.8613598586099072,
+          "skin_mass_kg": 0.8640000000000001,
+          "spar_mass_kg": 0.497359858609907,
+          "rib_mass_kg": 0.5,
+          "fuselage_mass_kg": 0.33504477454978326,
+          "tail_mass_kg": 0.18613598586099073,
+          "systems_mass_kg": 0.14295243714124087,
+          "total_structural_kg": 2.9254930561619217,
+          "material": "carbon_fiber_composite",
+          "flutter_margin": 1.5,
+          "bending_rigidity_Nm2": 24494.40000000001,
+          "n_ribs": 25
+        },
+        "power": {
+          "solar_area_m2": 2.880000000000001,
+          "solar_cell_type": "GaAs_multijunction",
+          "solar_efficiency": 0.3,
+          "peak_irradiance_W_m2": 1323.371072,
+          "avg_irradiance_W_m2": 759.5883127704874,
+          "peak_solar_power_W": 1143.3926062080002,
+          "avg_solar_power_W": 656.2843022337012,
+          "usable_solar_avg_W": 598.5312836371354,
+          "usable_solar_peak_W": 1042.7740568616962,
+          "day_hours": 12.5,
+          "night_hours": 11.5,
+          "day_energy_Wh": 7481.641045464193,
+          "night_consumption_Wh": 1533.7636467806012,
+          "day_surplus_Wh": 5814.506646789627,
+          "energy_feasible": true,
+          "power_margin_pct": 133.73568727336033,
+          "battery_energy_Wh": 1917.2045584757514,
+          "battery_mass_kg": 5.5119631056177845,
+          "battery_chemistry": "Li-S",
+          "battery_specific_energy_Wh_kg": 400,
+          "solar_mass_kg": 0.6336000000000002,
+          "electronics_mass_kg": 1.5,
+          "power_system_mass_kg": 7.645563105617785,
+          "cruise_power_W": 95.37075189396532,
+          "payload_power_W": 38.0,
+          "total_power_W": 133.37075189396532
+        },
+        "payload": {
+          "sensor_tier": "mil_standard",
+          "sensor_description": "Mil-spec - precision infrasound + SWIR array + EO",
+          "sensor_components": [
+            "Precision infrasound array",
+            "SWIR wide-angle cooled",
+            "EO sentinel camera",
+            "M1-class edge compute"
+          ],
+          "sensor_mass_kg": 6.0,
+          "sensor_cost_usd": 85000,
+          "detection_range_km": 120,
+          "detection_probability": 0.82,
+          "comms_mass_kg": 0.3,
+          "comms_power_W": 3.0,
+          "comms_cost_usd": 400,
+          "comms_range_km": 200,
+          "mesh_capable": true,
+          "satellite_link": false,
+          "bandwidth_mbps": 1.0,
+          "relay_architecture": "mesh_relay",
+          "total_payload_mass_kg": 6.3,
+          "always_on_power_W": 38.0,
+          "peak_power_W": 78.0,
+          "payload_cost_usd": 85400
+        },
+        "cost": {
+          "airframe_cost_usd": 585.0986112323843,
+          "tooling_per_unit_usd": 210.0,
+          "solar_cost_usd": 345.6000000000001,
+          "battery_cost_usd": 287.5806837713627,
+          "power_electronics_cost_usd": 2000,
+          "payload_cost_usd": 85400,
+          "ait_cost_usd": 146.27465280809608,
+          "propulsion_cost_usd": 2000,
+          "recovery_cost_usd": 500,
+          "per_unit_cost_usd": 91474.55394781183,
+          "production_run": 200
+        },
+        "fleet": {
+          "coverage_per_node_km2": 45238.93421169302,
+          "effective_coverage_km2": 30159.289474462013,
+          "overlap_factor": 1.5,
+          "nodes_active": 17,
+          "total_fleet_size": 27,
+          "fleet_cost_usd": 2469812.9565909193,
+          "cost_per_km2_usd": 4.939625913181839,
+          "node_density_per_km2": 3.4e-05,
+          "annual_maintenance_usd": 246981.29565909196,
+          "expected_lifetime_years": 3.0,
+          "spares_fraction": 0.2,
+          "failure_tolerance": "graceful_degradation",
+          "detection_fusion": true,
+          "single_node_pd": 0.82,
+          "avg_overlap_nodes": 2,
+          "swarm_detection_pd": 0.99,
+          "swarm_fusion_boost": 0.1
+        },
+        "mission": {
+          "battery_only_range_km": 1401.0101856954725,
+          "solar_endurance_days": 30,
+          "endurance_limited_by": "maintenance_cycle",
+          "transit_range_km": 500,
+          "operational_radius_km": 194.9231562706744,
+          "max_wind_ms": 21.65812847451938,
+          "max_wind_kts": 42.10340175446567,
+          "deployment_method": "conventional_runway",
+          "climb_time_hours": 2.328333333333333,
+          "design_recoverable": true,
+          "weather_tolerance": "fair_weather_only",
+          "altitude_band": "55000 ft (16.8 km)"
+        },
+        "feasibility": {
+          "energy_feasible": true,
+          "power_margin_ok": true,
+          "stall_margin_ok": true,
+          "wing_loading_ok": true,
+          "mass_reasonable": true,
+          "aspect_ratio_ok": true,
+          "span_structural_ok": true,
+          "all_feasible": true
+        },
+        "n_motors": 2
+      },
+      "sensitivity": {
+        "wingspan": [
+          {
+            "wingspan_m": 9.600000000000001,
+            "mass": 18.130691351579763,
+            "cost": 91294.5847494149,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 10.8,
+            "mass": 17.79668898868595,
+            "cost": 91372.52969960001,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 12.0,
+            "mass": 17.755494529101263,
+            "cost": 91474.55394781183,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 13.200000000000001,
+            "mass": 17.830303311776657,
+            "cost": 91580.68900612973,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 14.399999999999999,
+            "mass": 18.010942826013835,
+            "cost": 91695.98558894686,
+            "feasible": false
+          }
+        ],
+        "chord": [
+          {
+            "chord_m": 0.24000000000000005,
+            "mass": 17.297295538303388,
+            "cost": 91341.72640938475,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.2700000000000001,
+            "mass": 17.515701113811623,
+            "cost": 91407.57526918688,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.30000000000000004,
+            "mass": 17.755494529101263,
+            "cost": 91474.55394781183,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.33000000000000007,
+            "mass": 18.01683043042463,
+            "cost": 91542.49889062687,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.36000000000000004,
+            "mass": 18.287115281435213,
+            "cost": 91611.08112465582,
+            "feasible": true
+          }
+        ],
+        "altitude": [
+          {
+            "alt_ft": 55000,
+            "mass": 17.755494529101263,
+            "power_W": 95.37075189396532,
+            "feasible": true
+          },
+          {
+            "alt_ft": 58000,
+            "mass": 18.217920923659083,
+            "power_W": 106.53057014840135,
+            "feasible": false
+          },
+          {
+            "alt_ft": 61000,
+            "mass": 18.760140059899282,
+            "power_W": 119.64378179012503,
+            "feasible": false
+          },
+          {
+            "alt_ft": 64000,
+            "mass": 19.405643343774507,
+            "power_W": 135.28139417918834,
+            "feasible": false
+          },
+          {
+            "alt_ft": 67000,
+            "mass": 20.20510643181857,
+            "power_W": 154.61649722309062,
+            "feasible": false
+          },
+          {
+            "alt_ft": 70000,
+            "mass": 21.216310539060817,
+            "power_W": 179.12873139301706,
+            "feasible": false
+          },
+          {
+            "alt_ft": 73000,
+            "mass": 22.53674960361239,
+            "power_W": 211.08596460788547,
+            "feasible": false
+          },
+          {
+            "alt_ft": 76000,
+            "mass": 24.3663535105122,
+            "power_W": 255.35066753871556,
+            "feasible": false
+          },
+          {
+            "alt_ft": 79000,
+            "mass": 27.20364839385831,
+            "power_W": 324.0324729127268,
+            "feasible": false
+          }
+        ]
+      }
+    },
+    "mil_premium": {
+      "design": {
+        "design_inputs": {
+          "wingspan_m": 14.0,
+          "chord_m": 0.4,
+          "sensor_tier": "mil_premium",
+          "altitude_ft": 55000,
+          "altitude_m": 16764.0,
+          "coverage_target_km2": 500000
+        },
+        "mass_breakdown": {
+          "structural_kg": 3.9577438636857973,
+          "payload_kg": 10.3,
+          "power_system_kg": 11.152478913742435,
+          "battery_kg": 8.682095936861648,
+          "solar_panels_kg": 0.9856000000000001,
+          "propulsion_kg": 0.8999999999999999,
+          "total_mass_kg": 26.310222777428233
+        },
+        "aerodynamics": {
+          "wing_area_m2": 5.6000000000000005,
+          "aspect_ratio": 35.0,
+          "CL_cruise": 0.9,
+          "CD_total": 0.015921075508721058,
+          "CD_induced": 0.007921075508721058,
+          "L_over_D": 56.528844392893475,
+          "LD_best": 56.52953898028329,
+          "V_cruise_ms": 26.42311724105771,
+          "V_cruise_kmh": 95.12322206780776,
+          "V_cruise_kts": 51.36653991661619,
+          "V_stall_ms": 21.985362477745415,
+          "V_stall_kts": 42.73954465673709,
+          "drag_N": 4.564309583386831,
+          "power_required_W": 147.07717956867504,
+          "prop_efficiency": 0.82,
+          "reynolds": 109028.2871245864,
+          "mach": 0.08954799366966264,
+          "rho_kg_m3": 0.1466481392157258,
+          "temperature_K": 216.65,
+          "pressure_Pa": 9120.211393154912,
+          "wing_loading_N_m2": 46.074133250047595,
+          "wing_loading_kg_m2": 4.698254067397898
+        },
+        "structure": {
+          "wing_mass_kg": 2.6221579184004993,
+          "skin_mass_kg": 1.344,
+          "spar_mass_kg": 0.6981579184004993,
+          "rib_mass_kg": 0.58,
+          "fuselage_mass_kg": 0.47198842531208984,
+          "tail_mass_kg": 0.26221579184004995,
+          "systems_mass_kg": 0.20138172813315836,
+          "total_structural_kg": 3.9577438636857973,
+          "material": "carbon_fiber_composite",
+          "flutter_margin": 1.5,
+          "bending_rigidity_Nm2": 77414.40000000001,
+          "n_ribs": 29
+        },
+        "power": {
+          "solar_area_m2": 4.48,
+          "solar_cell_type": "GaAs_multijunction",
+          "solar_efficiency": 0.3,
+          "peak_irradiance_W_m2": 1323.371072,
+          "avg_irradiance_W_m2": 759.5883127704874,
+          "peak_solar_power_W": 1778.610720768,
+          "avg_solar_power_W": 1020.8866923635352,
+          "usable_solar_avg_W": 931.048663435544,
+          "usable_solar_peak_W": 1622.092977340416,
+          "day_hours": 12.5,
+          "night_hours": 11.5,
+          "day_energy_Wh": 11638.1082929443,
+          "night_consumption_Wh": 2415.887565039763,
+          "day_surplus_Wh": 9012.143548335862,
+          "energy_feasible": true,
+          "power_margin_pct": 130.83001203096248,
+          "battery_energy_Wh": 3019.8594562997037,
+          "battery_mass_kg": 8.682095936861648,
+          "battery_chemistry": "Li-S",
+          "battery_specific_energy_Wh_kg": 400,
+          "solar_mass_kg": 0.9856000000000001,
+          "electronics_mass_kg": 1.5,
+          "power_system_mass_kg": 11.167695936861648,
+          "cruise_power_W": 147.07717956867504,
+          "payload_power_W": 63.0,
+          "total_power_W": 210.07717956867504
+        },
+        "payload": {
+          "sensor_tier": "mil_premium",
+          "sensor_description": "Mil-spec premium - full multi-spectral + AI",
+          "sensor_components": [
+            "Redundant infrasound",
+            "Cooled SWIR array",
+            "Stabilized EO gimbal",
+            "MWIR",
+            "Edge TPU"
+          ],
+          "sensor_mass_kg": 10.0,
+          "sensor_cost_usd": 220000,
+          "detection_range_km": 200,
+          "detection_probability": 0.94,
+          "comms_mass_kg": 0.3,
+          "comms_power_W": 3.0,
+          "comms_cost_usd": 400,
+          "comms_range_km": 200,
+          "mesh_capable": true,
+          "satellite_link": false,
+          "bandwidth_mbps": 1.0,
+          "relay_architecture": "mesh_relay",
+          "total_payload_mass_kg": 10.3,
+          "always_on_power_W": 63.0,
+          "peak_power_W": 153.0,
+          "payload_cost_usd": 220400
+        },
+        "cost": {
+          "airframe_cost_usd": 791.5487727371594,
+          "tooling_per_unit_usd": 220.0,
+          "solar_cost_usd": 537.6,
+          "battery_cost_usd": 452.9789184449555,
+          "power_electronics_cost_usd": 2000,
+          "payload_cost_usd": 220400,
+          "ait_cost_usd": 197.88719318428986,
+          "propulsion_cost_usd": 2000,
+          "recovery_cost_usd": 500,
+          "per_unit_cost_usd": 227100.0148843664,
+          "production_run": 200
+        },
+        "fleet": {
+          "coverage_per_node_km2": 125663.70614359173,
+          "effective_coverage_km2": 83775.80409572781,
+          "overlap_factor": 1.5,
+          "nodes_active": 6,
+          "total_fleet_size": 10,
+          "fleet_cost_usd": 2271000.1488436637,
+          "cost_per_km2_usd": 4.542000297687327,
+          "node_density_per_km2": 1.2e-05,
+          "annual_maintenance_usd": 227100.0148843664,
+          "expected_lifetime_years": 3.0,
+          "spares_fraction": 0.2,
+          "failure_tolerance": "graceful_degradation",
+          "detection_fusion": true,
+          "single_node_pd": 0.94,
+          "avg_overlap_nodes": 2,
+          "swarm_detection_pd": 0.99,
+          "swarm_fusion_boost": 0.05
+        },
+        "mission": {
+          "battery_only_range_km": 1367.3963172247365,
+          "solar_endurance_days": 30,
+          "endurance_limited_by": "maintenance_cycle",
+          "transit_range_km": 500,
+          "operational_radius_km": 190.24644413561552,
+          "max_wind_ms": 21.13849379284617,
+          "max_wind_kts": 41.093231933292955,
+          "deployment_method": "conventional_runway",
+          "climb_time_hours": 2.328333333333333,
+          "design_recoverable": true,
+          "weather_tolerance": "fair_weather_only",
+          "altitude_band": "55000 ft (16.8 km)"
+        },
+        "feasibility": {
+          "energy_feasible": true,
+          "power_margin_ok": true,
+          "stall_margin_ok": true,
+          "wing_loading_ok": true,
+          "mass_reasonable": true,
+          "aspect_ratio_ok": true,
+          "span_structural_ok": true,
+          "all_feasible": true
+        },
+        "n_motors": 2
+      },
+      "sensitivity": {
+        "wingspan": [
+          {
+            "wingspan_m": 11.200000000000001,
+            "mass": 27.149246159308547,
+            "cost": 226855.50053914887,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 12.6,
+            "mass": 26.516114565985635,
+            "cost": 226964.10300858875,
+            "feasible": false
+          },
+          {
+            "wingspan_m": 14.0,
+            "mass": 26.310222777428233,
+            "cost": 227100.0148843664,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 15.400000000000002,
+            "mass": 26.325669751802348,
+            "cost": 227246.9964808554,
+            "feasible": true
+          },
+          {
+            "wingspan_m": 16.8,
+            "mass": 26.55893227587604,
+            "cost": 227415.63095225496,
+            "feasible": false
+          }
+        ],
+        "chord": [
+          {
+            "chord_m": 0.32000000000000006,
+            "mass": 25.51595436843111,
+            "cost": 226889.12107614614,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.36000000000000004,
+            "mass": 25.89741005815707,
+            "cost": 226993.74264307608,
+            "feasible": false
+          },
+          {
+            "chord_m": 0.4,
+            "mass": 26.310222777428233,
+            "cost": 227100.0148843664,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.44000000000000006,
+            "mass": 26.752925040855484,
+            "cost": 227207.6936902842,
+            "feasible": true
+          },
+          {
+            "chord_m": 0.48,
+            "mass": 27.21197903333148,
+            "cost": 227316.39106085795,
+            "feasible": true
+          }
+        ],
+        "altitude": [
+          {
+            "alt_ft": 55000,
+            "mass": 26.310222777428233,
+            "power_W": 147.07717956867504,
+            "feasible": true
+          },
+          {
+            "alt_ft": 58000,
+            "mass": 27.03776040689337,
+            "power_W": 164.67382103623572,
+            "feasible": true
+          },
+          {
+            "alt_ft": 61000,
+            "mass": 27.897464335657414,
+            "power_W": 185.492165605346,
+            "feasible": true
+          },
+          {
+            "alt_ft": 64000,
+            "mass": 28.935563726381055,
+            "power_W": 210.5893391542235,
+            "feasible": false
+          },
+          {
+            "alt_ft": 67000,
+            "mass": 30.228185775795886,
+            "power_W": 241.8937782999477,
+            "feasible": false
+          },
+          {
+            "alt_ft": 70000,
+            "mass": 31.90233277534807,
+            "power_W": 282.38171655221515,
+            "feasible": false
+          },
+          {
+            "alt_ft": 73000,
+            "mass": 34.131445575929696,
+            "power_W": 336.3542499220568,
+            "feasible": false
+          },
+          {
+            "alt_ft": 76000,
+            "mass": 37.36052908502046,
+            "power_W": 414.48915408870846,
+            "feasible": false
+          },
+          {
+            "alt_ft": 79000,
+            "mass": 42.91361727537695,
+            "power_W": 548.8870048445946,
+            "feasible": false
+          }
+        ]
+      }
+    }
+  }
+}

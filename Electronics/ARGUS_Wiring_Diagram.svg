@@ -1,0 +1,186 @@
+<svg viewBox="0 0 1100 800" xmlns="http://www.w3.org/2000/svg" font-family="Consolas, monospace" font-size="10">
+  <defs>
+    <marker id="a" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#64748b"/></marker>
+    <marker id="a-cy" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#22d3ee"/></marker>
+    <marker id="a-vi" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#8b5cf6"/></marker>
+    <marker id="a-gn" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#22c55e"/></marker>
+    <marker id="a-am" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#f59e0b"/></marker>
+    <marker id="a-bl" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#3b82f6"/></marker>
+    <marker id="a-pk" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#ec4899"/></marker>
+    <marker id="a-rd" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5" fill="#ef4444"/></marker>
+  </defs>
+  <rect width="1100" height="800" fill="#0f172a" rx="8"/>
+  <text x="550" y="32" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="bold">PROJECT ARGUS — Wiring Interconnect Diagram</text>
+  <text x="550" y="48" text-anchor="middle" fill="#94a3b8" font-size="10">Pin-Level Connections · Jetson Orin Nano Carrier Board</text>
+
+  <!-- CENTRAL: Jetson Orin Nano -->
+  <rect x="380" y="200" width="340" height="350" rx="6" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="550" y="225" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">NVIDIA Jetson Orin Nano</text>
+  <text x="550" y="242" text-anchor="middle" fill="#a78bfa" font-size="9">8GB · 40 TOPS · Carrier Board</text>
+
+  <!-- Left-side pins -->
+  <text x="395" y="275" fill="#22d3ee" font-size="9" font-weight="bold">I²S (Pin 12,35,38,40)</text>
+  <text x="395" y="298" fill="#8b5cf6" font-size="9" font-weight="bold">SPI0 (Pin 19,21,23,24,26)</text>
+  <text x="395" y="321" fill="#8b5cf6" font-size="9" font-weight="bold">SPI1 (Pin 37,22,13,18,16)</text>
+  <text x="395" y="344" fill="#3b82f6" font-size="9" font-weight="bold">CSI-2 (J5 Connector)</text>
+  <text x="395" y="367" fill="#22c55e" font-size="9" font-weight="bold">UART0 (Pin 8,10)</text>
+  <text x="395" y="390" fill="#22c55e" font-size="9" font-weight="bold">UART1 (Pin 11,36)</text>
+  <text x="395" y="413" fill="#f59e0b" font-size="9" font-weight="bold">I²C0 (Pin 3,5)</text>
+  <text x="395" y="436" fill="#f59e0b" font-size="9" font-weight="bold">I²C1 (Pin 27,28)</text>
+  <text x="395" y="459" fill="#ec4899" font-size="9" font-weight="bold">USB 2.0 (J6)</text>
+
+  <!-- Right-side pins -->
+  <text x="600" y="275" fill="#ef4444" font-size="9" font-weight="bold">PWM0 (Pin 32)</text>
+  <text x="600" y="298" fill="#ef4444" font-size="9" font-weight="bold">PWM1 (Pin 33)</text>
+  <text x="600" y="321" fill="#a78bfa" font-size="9" font-weight="bold">GPIO (Pin 7,15,29,31)</text>
+  <text x="600" y="344" fill="#f59e0b" font-size="9" font-weight="bold">5V IN (Pin 2,4)</text>
+  <text x="600" y="367" fill="#f59e0b" font-size="9" font-weight="bold">3.3V (Pin 1,17)</text>
+  <text x="600" y="390" fill="#64748b" font-size="9" font-weight="bold">GND (Pin 6,9,14,20,25,30,34,39)</text>
+
+  <!-- LEFT SIDE PERIPHERALS -->
+
+  <!-- MEMS Mics -->
+  <rect x="30" y="60" width="200" height="90" rx="4" fill="#042f2e" stroke="#14b8a6"/>
+  <text x="130" y="80" text-anchor="middle" fill="#5eead4" font-size="11" font-weight="bold">MEMS Infrasound ×12</text>
+  <text x="130" y="95" text-anchor="middle" fill="#99f6e4" font-size="9">ICS-40730 (TDK)</text>
+  <text x="45" y="112" fill="#94a3b8" font-size="8">BCLK → Pin 12   LRCK → Pin 35</text>
+  <text x="45" y="124" fill="#94a3b8" font-size="8">DOUT → Pin 38   WS → Pin 40</text>
+  <text x="45" y="136" fill="#94a3b8" font-size="8">VDD: 1.8V   |   8-ch TDM bus</text>
+  <text x="45" y="148" fill="#64748b" font-size="7">+4 external mics via twisted pair to wingtips/booms</text>
+
+  <!-- SWIR Leptons -->
+  <rect x="30" y="170" width="200" height="85" rx="4" fill="#1e1b4b" stroke="#6366f1"/>
+  <text x="130" y="190" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="bold">SWIR Lepton 3.5 ×2</text>
+  <text x="130" y="205" text-anchor="middle" fill="#c7d2fe" font-size="9">FLIR · 160×120 · 8-14µm</text>
+  <text x="45" y="222" fill="#94a3b8" font-size="8">SCLK → Pin 23   MOSI → Pin 19</text>
+  <text x="45" y="234" fill="#94a3b8" font-size="8">MISO → Pin 21   CS0 → Pin 24</text>
+  <text x="45" y="246" fill="#94a3b8" font-size="8">CS1 → Pin 26   VDD: 3.3V (gated)</text>
+
+  <!-- LoRa -->
+  <rect x="30" y="275" width="200" height="80" rx="4" fill="#052e16" stroke="#22c55e"/>
+  <text x="130" y="295" text-anchor="middle" fill="#86efac" font-size="11" font-weight="bold">LoRa RFM95W</text>
+  <text x="130" y="308" text-anchor="middle" fill="#bbf7d0" font-size="9">915 MHz · Mesh P2P</text>
+  <text x="45" y="325" fill="#94a3b8" font-size="8">SCLK → Pin 13   MOSI → Pin 37</text>
+  <text x="45" y="337" fill="#94a3b8" font-size="8">MISO → Pin 22   CS → Pin 18</text>
+  <text x="45" y="349" fill="#94a3b8" font-size="8">IRQ → Pin 16 (GPIO)  VDD: 3.3V</text>
+
+  <!-- IMU -->
+  <rect x="30" y="375" width="200" height="70" rx="4" fill="#1a1a2e" stroke="#64748b"/>
+  <text x="130" y="395" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="bold">IMU ICM-42688</text>
+  <text x="130" y="408" text-anchor="middle" fill="#94a3b8" font-size="9">TDK · 6-DOF · SPI</text>
+  <text x="45" y="425" fill="#94a3b8" font-size="8">Shared SPI1 bus · CS → Pin 16 (alt)</text>
+  <text x="45" y="437" fill="#94a3b8" font-size="8">INT → GPIO Pin 7   VDD: 1.8V</text>
+
+  <!-- EO Camera -->
+  <rect x="30" y="465" width="200" height="70" rx="4" fill="#1e3a5f" stroke="#3b82f6"/>
+  <text x="130" y="485" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="bold">EO Camera IMX477</text>
+  <text x="130" y="498" text-anchor="middle" fill="#bfdbfe" font-size="9">12.3MP · Sony · f/1.4</text>
+  <text x="45" y="515" fill="#94a3b8" font-size="8">CSI-2 → J5 (2-lane MIPI)</text>
+  <text x="45" y="527" fill="#94a3b8" font-size="8">MCLK/D0±/D1±/CLK±   VDD: 1.8V + 2.8V</text>
+
+  <!-- GPS -->
+  <rect x="30" y="555" width="200" height="65" rx="4" fill="#052e16" stroke="#22c55e"/>
+  <text x="130" y="575" text-anchor="middle" fill="#86efac" font-size="11" font-weight="bold">GPS u-blox NEO-M9N</text>
+  <text x="130" y="588" text-anchor="middle" fill="#bbf7d0" font-size="9">L1/L5 · 25Hz update</text>
+  <text x="45" y="605" fill="#94a3b8" font-size="8">TX → Pin 10   RX → Pin 8   UART0</text>
+  <text x="45" y="615" fill="#94a3b8" font-size="8">PPS → GPIO Pin 15   VDD: 3.3V</text>
+
+  <!-- Iridium -->
+  <rect x="30" y="640" width="200" height="65" rx="4" fill="#052e16" stroke="#22c55e"/>
+  <text x="130" y="660" text-anchor="middle" fill="#86efac" font-size="11" font-weight="bold">Iridium 9603N</text>
+  <text x="130" y="673" text-anchor="middle" fill="#bbf7d0" font-size="9">SBD · Global coverage</text>
+  <text x="45" y="690" fill="#94a3b8" font-size="8">TX → Pin 36   RX → Pin 11   UART1</text>
+  <text x="45" y="700" fill="#94a3b8" font-size="8">ON/OFF → GPIO Pin 29   VDD: 5V</text>
+
+  <!-- RIGHT SIDE PERIPHERALS -->
+
+  <!-- ESC Motor 1 -->
+  <rect x="870" y="60" width="200" height="75" rx="4" fill="#1a1a2e" stroke="#ef4444"/>
+  <text x="970" y="80" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="bold">ESC #1 (Right Motor)</text>
+  <text x="970" y="93" text-anchor="middle" fill="#fecaca" font-size="9">BLDC 200W · DShot600</text>
+  <text x="885" y="110" fill="#94a3b8" font-size="8">Signal → Pin 32 (PWM0)</text>
+  <text x="885" y="122" fill="#94a3b8" font-size="8">Power: Battery direct (14.8V)</text>
+  <text x="885" y="132" fill="#94a3b8" font-size="8">Telemetry → UART (optional)</text>
+
+  <!-- ESC Motor 2 -->
+  <rect x="870" y="155" width="200" height="75" rx="4" fill="#1a1a2e" stroke="#ef4444"/>
+  <text x="970" y="175" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="bold">ESC #2 (Left Motor)</text>
+  <text x="970" y="188" text-anchor="middle" fill="#fecaca" font-size="9">BLDC 200W · DShot600</text>
+  <text x="885" y="205" fill="#94a3b8" font-size="8">Signal → Pin 33 (PWM1)</text>
+  <text x="885" y="217" fill="#94a3b8" font-size="8">Power: Battery direct (14.8V)</text>
+
+  <!-- Power Gates -->
+  <rect x="870" y="250" width="200" height="90" rx="4" fill="#1a1a2e" stroke="#a78bfa"/>
+  <text x="970" y="270" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold">Power Gate FETs</text>
+  <text x="970" y="283" text-anchor="middle" fill="#a78bfa" font-size="9">Si2301 P-MOSFET switches</text>
+  <text x="885" y="300" fill="#94a3b8" font-size="8">SWIR_EN → GPIO Pin 31</text>
+  <text x="885" y="312" fill="#94a3b8" font-size="8">EO_EN → GPIO Pin 29</text>
+  <text x="885" y="324" fill="#94a3b8" font-size="8">360_EN → GPIO Pin 15</text>
+  <text x="885" y="336" fill="#94a3b8" font-size="8">Controls Tier 2/3 sensor power</text>
+
+  <!-- BMP390 Baro -->
+  <rect x="870" y="360" width="200" height="65" rx="4" fill="#1a1a2e" stroke="#f59e0b"/>
+  <text x="970" y="380" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="bold">BMP390 Barometer</text>
+  <text x="970" y="393" text-anchor="middle" fill="#fcd34d" font-size="9">Pressure / Altitude</text>
+  <text x="885" y="410" fill="#94a3b8" font-size="8">SDA → Pin 3   SCL → Pin 5   I²C0</text>
+  <text x="885" y="420" fill="#94a3b8" font-size="8">Addr: 0x77   VDD: 3.3V</text>
+
+  <!-- INA219 Power Mon -->
+  <rect x="870" y="445" width="200" height="65" rx="4" fill="#1a1a2e" stroke="#f59e0b"/>
+  <text x="970" y="465" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="bold">INA219 Power Monitor</text>
+  <text x="970" y="478" text-anchor="middle" fill="#fcd34d" font-size="9">Battery V/I sensing</text>
+  <text x="885" y="495" fill="#94a3b8" font-size="8">SDA → Pin 27   SCL → Pin 28   I²C1</text>
+  <text x="885" y="505" fill="#94a3b8" font-size="8">Addr: 0x40   VDD: 3.3V</text>
+
+  <!-- 360 Camera -->
+  <rect x="870" y="530" width="200" height="65" rx="4" fill="#1e3a5f" stroke="#ec4899"/>
+  <text x="970" y="550" text-anchor="middle" fill="#f9a8d4" font-size="11" font-weight="bold">Ricoh Theta Z1</text>
+  <text x="970" y="563" text-anchor="middle" fill="#fbcfe8" font-size="9">360° Omnidirectional</text>
+  <text x="885" y="580" fill="#94a3b8" font-size="8">USB 2.0 → J6 port</text>
+  <text x="885" y="590" fill="#94a3b8" font-size="8">Power: USB 5V (gated)</text>
+
+  <!-- NVMe -->
+  <rect x="870" y="615" width="200" height="55" rx="4" fill="#2e1065" stroke="#8b5cf6"/>
+  <text x="970" y="635" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold">NVMe SSD 256GB</text>
+  <text x="885" y="655" fill="#94a3b8" font-size="8">M.2 Key M → J8 slot</text>
+  <text x="885" y="665" fill="#94a3b8" font-size="8">PCIe Gen3 ×4 · Data logging</text>
+
+  <!-- WIRING LINES — Left side to Jetson -->
+  <!-- MEMS → I2S -->
+  <line x1="230" y1="105" x2="380" y2="270" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#a-cy)"/>
+  <!-- SWIR → SPI0 -->
+  <line x1="230" y1="210" x2="380" y2="293" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#a-vi)"/>
+  <!-- LoRa → SPI1 -->
+  <line x1="230" y1="315" x2="380" y2="316" stroke="#22c55e" stroke-width="1.5" marker-end="url(#a-gn)"/>
+  <!-- IMU → SPI1 -->
+  <line x1="230" y1="410" x2="380" y2="316" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#a)"/>
+  <!-- EO → CSI -->
+  <line x1="230" y1="500" x2="380" y2="339" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a-bl)"/>
+  <!-- GPS → UART0 -->
+  <line x1="230" y1="590" x2="380" y2="362" stroke="#22c55e" stroke-width="1.5" marker-end="url(#a-gn)"/>
+  <!-- Iridium → UART1 -->
+  <line x1="230" y1="670" x2="380" y2="385" stroke="#22c55e" stroke-width="1.5" marker-end="url(#a-gn)"/>
+
+  <!-- WIRING LINES — Right side from Jetson -->
+  <!-- ESC1 → PWM0 -->
+  <line x1="720" y1="270" x2="870" y2="97" stroke="#ef4444" stroke-width="1.5" marker-end="url(#a-rd)"/>
+  <!-- ESC2 → PWM1 -->
+  <line x1="720" y1="293" x2="870" y2="190" stroke="#ef4444" stroke-width="1.5" marker-end="url(#a-rd)"/>
+  <!-- Power Gates → GPIO -->
+  <line x1="720" y1="316" x2="870" y2="290" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#a-vi)"/>
+  <!-- BMP390 → I2C0 -->
+  <line x1="720" y1="408" x2="870" y2="390" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a-am)"/>
+  <!-- INA219 → I2C1 -->
+  <line x1="720" y1="431" x2="870" y2="475" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a-am)"/>
+  <!-- 360 cam → USB -->
+  <line x1="720" y1="454" x2="870" y2="560" stroke="#ec4899" stroke-width="1.5" marker-end="url(#a-pk)"/>
+
+  <!-- POWER RAIL at bottom -->
+  <rect x="30" y="730" width="1040" height="55" rx="4" fill="#1c1917" stroke="#78716c"/>
+  <text x="550" y="750" text-anchor="middle" fill="#fcd34d" font-size="12" font-weight="bold">POWER DISTRIBUTION</text>
+  <text x="120" y="770" text-anchor="middle" fill="#fbbf24" font-size="9">Solar → MPPT → 14.8V Bus</text>
+  <text x="330" y="770" text-anchor="middle" fill="#fbbf24" font-size="9">Buck TPS54560 → 5V @ 5A</text>
+  <text x="550" y="770" text-anchor="middle" fill="#fbbf24" font-size="9">LDO TLV1117 → 3.3V @ 0.8A</text>
+  <text x="770" y="770" text-anchor="middle" fill="#fbbf24" font-size="9">LDO AP2112 → 1.8V @ 0.6A</text>
+  <text x="980" y="770" text-anchor="middle" fill="#fbbf24" font-size="9">Battery Direct → ESC ×2</text>
+</svg>

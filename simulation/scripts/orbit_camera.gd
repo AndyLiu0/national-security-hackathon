@@ -6,8 +6,8 @@ extends Camera3D
 @export var controller_path: NodePath
 @export var argus_path: NodePath
 @export var hcm_path: NodePath
-@export var orbit_radius: float = 380.0
-@export var orbit_height: float = 180.0
+@export var orbit_radius: float = 260.0
+@export var orbit_height: float = 130.0
 @export var orbit_speed: float = 0.04
 
 var _t: float = 0.0
@@ -26,11 +26,11 @@ func _process(delta: float) -> void:
 	match mode:
 		1:
 			if argus:
-				global_transform.origin = argus.position + Vector3(40, 25, 40)
+				global_transform.origin = argus.position + Vector3(25, 16, 25)
 				look_at(argus.position, Vector3.UP)
 		2:
 			if hcm:
-				global_transform.origin = hcm.position + Vector3(60, 35, 60)
+				global_transform.origin = hcm.position + Vector3(38, 22, 38)
 				look_at(hcm.position, Vector3.UP)
 		_:
 			global_transform.origin = Vector3(cos(_t) * orbit_radius, orbit_height, sin(_t) * orbit_radius)

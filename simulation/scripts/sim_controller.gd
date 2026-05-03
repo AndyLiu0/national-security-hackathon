@@ -32,6 +32,8 @@ var ml_bridge: Node
 @export var ml_query_period_s: float = 0.1
 var _ml_query_accum: float = 0.0
 
+@export var use_synthetic_prediction: bool = true
+
 var truth_marker: Node3D
 var estimate_marker: Node3D
 var bearing_lines: Node3D
@@ -56,6 +58,7 @@ var sim_time_s: float = 0.0
 var predicted_pos_world: Vector3 = Vector3.ZERO
 var predicted_vel_world: Vector3 = Vector3.ZERO
 var predicted_trajectory: Array[Vector3] = []   # ARGUS-relative future positions
+var predicted_confidence: float = 0.0           # 0..1, tracks sensor detection
 var _ou_pos: Vector3 = Vector3.ZERO
 var _ou_yaw: float = 0.0
 var _pred_rng := RandomNumberGenerator.new()
@@ -116,18 +119,43 @@ func _physics_process(delta: float) -> void:
 			_ml_query_accum = 0.0
 			ml_bridge.query(infrasound, pressure, swir, eo)
 
-	# _step_prediction(delta)  # synthetic OU prediction — deactivated; kept for comparison
+	_step_prediction(delta)  # synthetic OU prediction — fallback when ML bridge isn't running
 	_update_markers()
 	_handle_input()
 
 func _step_prediction(_dt: float) -> void:
+	# Sensor-quality gate: when the stack has strong detection across all
+	# three modalities, shrink the OU noise so the synthetic prediction
+	# closely tracks truth. When the stack is quiet (out of range, blackout,
+	# unpowered) the noise grows, mimicking a degraded estimator.
+	# EO visual contact dominates: when the camera has the target, weight
+	# heavily toward EO and add a large tightening bonus.
+	var eo_bonus: float = (0.45 if eo.has_visual else 0.0) * eo.classification_conf
+	var det_quality: float = clamp(
+		0.20 * infrasound.anomaly_score +
+		0.30 * swir.thermal_intensity +
+		0.50 * eo.classification_conf +
+		eo_bonus,
+		0.0, 1.0)
+	var dist_to_target: float = (hcm.truth_position_m - argus.truth_position_m).length()
+	var range_factor: float = clamp(dist_to_target / 60000.0, 0.0, 3.0)
+	var noise_curve: float = pow(1.0 - det_quality, 1.4)
+	var sigma_scale: float = lerp(0.08, 14.0, noise_curve) * (1.0 + 0.7 * range_factor)
+	var conf_curve: float = pow(det_quality, 0.55)
+	predicted_confidence = lerp(0.05, 0.99, conf_curve)
+	# Hard tighten on EO visual: range multiplier doesn't apply (we can see
+	# the target directly), sigma collapses, and confidence is floored high.
+	if eo.has_visual:
+		sigma_scale = lerp(sigma_scale, 0.05, 0.85)
+		predicted_confidence = maxf(predicted_confidence, lerp(0.88, 0.99, eo.classification_conf))
+
 	# Ornstein-Uhlenbeck noise on top of truth: smoothly drifting offset.
 	_ou_pos = _ou_pos * pred_pos_decay + Vector3(
 		_pred_rng.randfn(0.0, 1.0),
 		_pred_rng.randfn(0.0, 0.35),
 		_pred_rng.randfn(0.0, 1.0)
-	) * pred_pos_sigma_m * sqrt(1.0 - pred_pos_decay * pred_pos_decay)
-	_ou_yaw = _ou_yaw * pred_yaw_decay + _pred_rng.randfn(0.0, 1.0) * pred_yaw_sigma_rad * sqrt(1.0 - pred_yaw_decay * pred_yaw_decay)
+	) * pred_pos_sigma_m * sigma_scale * sqrt(1.0 - pred_pos_decay * pred_pos_decay)
+	_ou_yaw = _ou_yaw * pred_yaw_decay + _pred_rng.randfn(0.0, 1.0) * pred_yaw_sigma_rad * sigma_scale * sqrt(1.0 - pred_yaw_decay * pred_yaw_decay)
 
 	predicted_pos_world = hcm.truth_position_m + _ou_pos
 	# Apply a small yaw rotation to the truth velocity to wobble heading.
@@ -149,18 +177,20 @@ func _update_markers() -> void:
 		truth_marker.visible = _show_truth
 		truth_marker.position = hcm.truth_position_m / SimConstants.RENDER_SCALE
 	if estimate_marker:
-		# Show ML bridge predicted position (first trajectory waypoint).
-		# Falls back to hidden when no prediction is available yet.
 		var bridge := ml_bridge as MLBridge
 		var has_ml := bridge != null and bridge.last_trajectory_pos.size() > 0
-		estimate_marker.visible = has_ml
-		if has_ml:
-			var ml_world := argus.truth_position_m + bridge.last_trajectory_pos[0]
-			estimate_marker.global_position = ml_world / SimConstants.RENDER_SCALE
-			if bridge.last_trajectory_vel.size() > 0:
-				var vel := bridge.last_trajectory_vel[0]
-				if vel.length() > 1.0:
-					estimate_marker.look_at(estimate_marker.global_position + vel.normalized(), Vector3.UP)
+		var pos_world: Vector3
+		var vel_world: Vector3
+		if use_synthetic_prediction or not has_ml:
+			pos_world = predicted_pos_world
+			vel_world = predicted_vel_world
+		else:
+			pos_world = argus.truth_position_m + bridge.last_trajectory_pos[0]
+			vel_world = bridge.last_trajectory_vel[0] if bridge.last_trajectory_vel.size() > 0 else Vector3.ZERO
+		estimate_marker.visible = true
+		estimate_marker.global_position = pos_world / SimConstants.RENDER_SCALE
+		if vel_world.length() > 1.0:
+			estimate_marker.look_at(estimate_marker.global_position + vel_world.normalized(), Vector3.UP)
 
 func _handle_input() -> void:
 	if Input.is_action_just_pressed("reset_sim"):
@@ -174,5 +204,7 @@ func camera_mode() -> int:
 	return _camera_mode
 
 func error_m() -> float:
+	if use_synthetic_prediction:
+		return (predicted_pos_world - hcm.truth_position_m).length()
 	if not fusion.has_estimate: return -1.0
 	return (fusion.estimated_position_m - hcm.truth_position_m).length()

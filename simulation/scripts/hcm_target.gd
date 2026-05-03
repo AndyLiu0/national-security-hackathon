@@ -18,7 +18,7 @@ class_name HCMTarget
 
 @export var cruise_speed_mps: float = SimConstants.HCM_CRUISE_MPS
 @export var alt_band: Vector2 = Vector2(SimConstants.HCM_ALT_MIN_M, SimConstants.HCM_ALT_MAX_M)
-@export var lateral_g: float = 6.0          # base G — modes scale off this
+@export var lateral_g: float = 7.5          # base G — modes scale off this
 @export var maneuver_period_s: float = 4.5  # legacy export; kept for scene compat
 @export var altitude_jitter_m: float = 1500.0  # legacy export; kept for scene compat
 
@@ -97,7 +97,7 @@ func _step_evasion(delta: float) -> void:
 			if _jink_subtimer <= 0.0:
 				if _jink_remaining > 0:
 					_lateral_bias   = -_lateral_bias
-					_jink_subtimer  = rng.randf_range(0.7, 1.4)
+					_jink_subtimer  = rng.randf_range(0.4, 0.9)
 					_jink_remaining -= 1
 				else:
 					_lateral_bias = 0.0  # coast straight after series ends
@@ -117,49 +117,55 @@ func _step_evasion(delta: float) -> void:
 func _pick_maneuver() -> void:
 	var r := rng.randf()
 
-	if r < 0.15:
-		# CRUISE — quiet, low lateral load, long dwell
+	# Mode-mix biased toward the high-visibility maneuvers (S_TURN / JINK /
+	# DIVE / CLIMB_DASH) so the missile's evasion is obvious on the tacmap
+	# and primary view, while keeping each behaviour physically reasonable.
+	if r < 0.04:
+		# CRUISE — almost never quiet; short straight segment only.
 		_maneuver     = Maneuver.CRUISE
-		_lateral_bias = rng.randf_range(-0.25, 0.25)
-		_maneuver_timer = rng.randf_range(4.0, 8.0)
+		_lateral_bias = rng.randf_range(-0.40, 0.40)
+		_maneuver_timer = rng.randf_range(1.0, 2.5)
 
-	elif r < 0.40:
-		# S_TURN — sinusoidal snake; defeats linear extrapolation
+	elif r < 0.32:
+		# S_TURN — tight sinusoidal snake at near-max amplitude.
 		_maneuver   = Maneuver.S_TURN
 		_s_phase    = rng.randf_range(0.0, TAU)
-		_s_freq     = rng.randf_range(0.35, 0.75)   # 8–18 s full period
-		_s_amp      = rng.randf_range(0.65, 1.0)
-		_maneuver_timer = rng.randf_range(8.0, 18.0)  # several full oscillations
-
-	elif r < 0.62:
-		# JINK — hard breaks; most disruptive to tracking
-		_maneuver       = Maneuver.JINK
-		_jink_remaining = rng.randi_range(3, 6)
-		_jink_subtimer  = 0.0
-		_lateral_bias   = (1.0 if rng.randf() > 0.5 else -1.0) * rng.randf_range(0.8, 1.0)
-		_maneuver_timer = rng.randf_range(5.0, 9.0)
-
-	elif r < 0.80:
-		# DIVE — nose-down; defeats look-down radar geometry, increases range ambiguity
-		_maneuver     = Maneuver.DIVE
-		_lateral_bias = rng.randf_range(-0.45, 0.45)
-		_target_alt_m = alt_band.x + rng.randf_range(0.0, 3000.0)
+		_s_freq     = rng.randf_range(0.85, 1.55)   # 4–7.4 s full period
+		_s_amp      = rng.randf_range(0.95, 1.0)
 		_maneuver_timer = rng.randf_range(6.0, 12.0)
 
+	elif r < 0.70:
+		# JINK — hard reversals with very short dwell between flips.
+		_maneuver       = Maneuver.JINK
+		_jink_remaining = rng.randi_range(7, 12)
+		_jink_subtimer  = 0.0
+		_lateral_bias   = (1.0 if rng.randf() > 0.5 else -1.0)
+		_maneuver_timer = rng.randf_range(6.0, 11.0)
+
+	elif r < 0.88:
+		# DIVE — strong nose-down with lateral component.
+		_maneuver     = Maneuver.DIVE
+		_lateral_bias = rng.randf_range(-0.80, 0.80)
+		_target_alt_m = alt_band.x + rng.randf_range(0.0, 800.0)
+		_maneuver_timer = rng.randf_range(6.0, 10.0)
+
 	else:
-		# CLIMB_DASH — zoom to ceiling; repositions look-angle for sensors
+		# CLIMB_DASH — punch for the ceiling under heavy lateral load.
 		_maneuver     = Maneuver.CLIMB_DASH
-		_lateral_bias = rng.randf_range(-0.35, 0.35)
-		_target_alt_m = alt_band.y - rng.randf_range(0.0, 3000.0)
-		_maneuver_timer = rng.randf_range(5.0, 9.0)
+		_lateral_bias = rng.randf_range(-0.65, 0.65)
+		_target_alt_m = alt_band.y - rng.randf_range(0.0, 800.0)
+		_maneuver_timer = rng.randf_range(5.0, 8.0)
 
 func _current_g() -> float:
+	# Aggressive load factors — JINK transients touch ~12 G (transient
+	# structural limit for a maneuvering HCM), other modes pulled up so
+	# every phase produces visible heading swings.
 	match _maneuver:
-		Maneuver.CRUISE:     return lateral_g * 0.35
-		Maneuver.S_TURN:     return lateral_g * 0.75
-		Maneuver.JINK:       return lateral_g * 1.45  # ~8.7 G at default export
-		Maneuver.DIVE:       return lateral_g * 0.55
-		Maneuver.CLIMB_DASH: return lateral_g * 0.50
+		Maneuver.CRUISE:     return lateral_g * 0.70
+		Maneuver.S_TURN:     return lateral_g * 1.40
+		Maneuver.JINK:       return lateral_g * 1.60  # ~12 G at lateral_g=7.5
+		Maneuver.DIVE:       return lateral_g * 1.05
+		Maneuver.CLIMB_DASH: return lateral_g * 1.00
 	return lateral_g
 
 # ---------------------------------------------------------------------------

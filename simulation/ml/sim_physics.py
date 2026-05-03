@@ -30,6 +30,12 @@ MANEUVER_DIVE       = 3
 MANEUVER_CLIMB_DASH = 4
 
 
+N_CAMS = 4
+CAM_FOV_RAD = math.radians(100.0)
+HALF_FOV = CAM_FOV_RAD / 2.0
+CAM_YAWS = [0.0, math.pi / 2.0, math.pi, -math.pi / 2.0]  # F, R, B, L
+
+
 @dataclass
 class SensorReading:
     # raw sensor outputs (what the model sees)
@@ -38,23 +44,24 @@ class SensorReading:
     inf_elevation_rad: float
     pressure_left: float
     pressure_right: float
-    swir_intensity: float
-    swir_bearing_rad: float
-    swir_elevation_rad: float
-    swir_range_m: float
-    swir_lock: float        # 0/1
-    eo_class_conf: float
-    eo_bearing_rad: float
-    eo_elevation_rad: float
-    eo_range_m: float
-    eo_visual: float        # 0/1
-    plasma_blackout: float  # 0/1 (latent context, not always available)
+    # Per-quadrant SWIR / EO outputs — one entry per camera (F, R, B, L).
+    # Together these form a 360° panoramic strip indexed by camera position.
+    swir_intensity: list           # length N_CAMS, each in [0,1]
+    swir_bearing_rad: list         # camera-local bearing of the target (rad)
+    swir_elevation_rad: list
+    swir_range_m: list
+    swir_lock: list                # 0/1 per camera
+    eo_class_conf: list
+    eo_bearing_rad: list
+    eo_elevation_rad: list
+    eo_range_m: list
+    eo_visual: list
+    plasma_blackout: float
     # ground truth (labels)
     is_target: int
     target_range_m: float
     target_speed_mps: float
     target_alt_m: float
-    # ARGUS-relative target position + velocity in meters (truth).
     rel_x_m: float
     rel_y_m: float
     rel_z_m: float
@@ -67,19 +74,30 @@ def _gauss(rng: np.random.Generator, sigma: float) -> float:
     return float(rng.normal(0.0, sigma))
 
 
+NEAR_FIELD_K = 320.0
+NEAR_FIELD_FLOOR_M = 200.0
+
+
 def sample_pressure(rng, argus_pos, argus_heading_rad, target_pos, target_speed):
     """Stereo wingtip transducers — sum encodes intensity, difference encodes
-    lateral bearing relative to glider body."""
+    lateral bearing relative to glider body. Near-field N-wave term gives a
+    sharp 1/r overpressure spike on close hypersonic passes."""
     rel = target_pos - argus_pos
     dist = float(np.linalg.norm(rel))
     range_factor = max(0.0, 1.0 - dist / INFRASOUND_RANGE_M) ** 1.8
     mach = max(target_speed, 1.0) / 340.0
-    base = range_factor * (1.0 - math.exp(-(mach * mach) / 90.0))
+    far_field = range_factor * (1.0 - math.exp(-(mach * mach) / 90.0))
+
+    super_factor = max(0.0, math.sqrt(mach) - 1.0)
+    near_field = NEAR_FIELD_K * super_factor / max(dist, NEAR_FIELD_FLOOR_M)
+    near_field *= max(0.0, min(1.0, 1.0 - dist / 8000.0))
+
+    base = far_field + near_field
     rel_az = math.atan2(rel[2], rel[0]) - argus_heading_rad
     lateral = math.sin(rel_az)
     left = base * (0.5 + 0.5 * lateral) + _gauss(rng, 0.025)
     right = base * (0.5 - 0.5 * lateral) + _gauss(rng, 0.025)
-    return max(0.0, min(1.5, left)), max(0.0, min(1.5, right))
+    return max(0.0, min(4.0, left)), max(0.0, min(4.0, right))
 
 
 def sample_infrasound(rng, argus_pos, target_pos, target_speed):
@@ -98,40 +116,68 @@ def sample_infrasound(rng, argus_pos, target_pos, target_speed):
     return anomaly, bearing, elev
 
 
-def sample_swir(rng, argus_pos, target_pos, target_thermal):
-    rel = target_pos - argus_pos
-    dist = float(np.linalg.norm(rel))
-    if dist > SWIR_RANGE_M:
-        return 0.0, 0.0, 0.0, 0.0, 0.0
-    apparent = target_thermal / (max(dist / 10000.0, 0.5) ** 2)
-    intensity = max(0.0, min(1.0, apparent + _gauss(rng, 0.04)))
-    lock = 1.0 if intensity > 0.18 else 0.0
-    bearing = math.atan2(rel[2], rel[0]) + _gauss(rng, math.radians(0.8))
-    horiz = math.hypot(rel[0], rel[2])
-    elev = math.atan2(rel[1], max(horiz, 1.0)) + _gauss(rng, math.radians(0.8))
-    if lock and target_thermal > 0.01:
-        inv_range = math.sqrt(target_thermal / max(intensity, 1e-3)) * 10000.0
-        rng_est = inv_range * (1.0 + _gauss(rng, 0.18))
-    else:
-        rng_est = 0.0
-    return intensity, bearing, elev, rng_est, lock
+def _wrap_pi(a: float) -> float:
+    return (a + math.pi) % (2.0 * math.pi) - math.pi
 
 
-def sample_eo(rng, argus_pos, target_pos, night_factor=1.0):
+def sample_swir_pano(rng, argus_pos, argus_heading_rad, target_pos, target_thermal):
+    """4-camera SWIR ring → list of (intensity, bearing, elev, range, lock).
+    A camera only registers a target when the target falls within its FOV;
+    other cameras report zeros. Stacked together, the four entries form a
+    panoramic 360° SWIR strip the CNN consumes as a single image."""
     rel = target_pos - argus_pos
     dist = float(np.linalg.norm(rel))
-    if dist > EO_RANGE_M:
-        return 0.0, 0.0, 0.0, 0.0, 0.0
-    vis = (1.0 - dist / EO_RANGE_M) * night_factor
-    conf = max(0.0, min(1.0, vis + _gauss(rng, 0.05)))
-    visual = 1.0 if conf > 0.25 else 0.0
-    bearing = math.atan2(rel[2], rel[0]) + _gauss(rng, math.radians(0.15))
+    abs_bearing = math.atan2(rel[2], rel[0])
     horiz = math.hypot(rel[0], rel[2])
-    elev = math.atan2(rel[1], max(horiz, 1.0)) + _gauss(rng, math.radians(0.15))
-    rng_est = dist * (1.0 + _gauss(rng, 0.08)) * (1.0 + _gauss(rng, 0.12 + dist / EO_RANGE_M * 0.2))
-    if not visual:
-        rng_est = 0.0
-    return conf, bearing, elev, rng_est, visual
+    elev_world = math.atan2(rel[1], max(horiz, 1.0))
+    out_i, out_b, out_e, out_r, out_l = [], [], [], [], []
+    for k in range(N_CAMS):
+        cam_world_yaw = argus_heading_rad + CAM_YAWS[k]
+        local = _wrap_pi(abs_bearing - cam_world_yaw)
+        if dist > SWIR_RANGE_M or abs(local) > HALF_FOV:
+            out_i.append(0.0); out_b.append(0.0); out_e.append(0.0)
+            out_r.append(0.0); out_l.append(0.0)
+            continue
+        apparent = target_thermal / (max(dist / 10000.0, 0.5) ** 2)
+        intensity = max(0.0, min(1.0, apparent + _gauss(rng, 0.04)))
+        lock = 1.0 if intensity > 0.18 else 0.0
+        bearing = local + _gauss(rng, math.radians(0.8))
+        elev = elev_world + _gauss(rng, math.radians(0.8))
+        if lock and target_thermal > 0.01:
+            inv_range = math.sqrt(target_thermal / max(intensity, 1e-3)) * 10000.0
+            rng_est = inv_range * (1.0 + _gauss(rng, 0.18))
+        else:
+            rng_est = 0.0
+        out_i.append(intensity); out_b.append(bearing); out_e.append(elev)
+        out_r.append(rng_est);   out_l.append(lock)
+    return out_i, out_b, out_e, out_r, out_l
+
+
+def sample_eo_pano(rng, argus_pos, argus_heading_rad, target_pos, night_factor=1.0):
+    rel = target_pos - argus_pos
+    dist = float(np.linalg.norm(rel))
+    abs_bearing = math.atan2(rel[2], rel[0])
+    horiz = math.hypot(rel[0], rel[2])
+    elev_world = math.atan2(rel[1], max(horiz, 1.0))
+    out_c, out_b, out_e, out_r, out_v = [], [], [], [], []
+    for k in range(N_CAMS):
+        cam_world_yaw = argus_heading_rad + CAM_YAWS[k]
+        local = _wrap_pi(abs_bearing - cam_world_yaw)
+        if dist > EO_RANGE_M or abs(local) > HALF_FOV:
+            out_c.append(0.0); out_b.append(0.0); out_e.append(0.0)
+            out_r.append(0.0); out_v.append(0.0)
+            continue
+        vis = (1.0 - dist / EO_RANGE_M) * night_factor
+        conf = max(0.0, min(1.0, vis + _gauss(rng, 0.05)))
+        visual = 1.0 if conf > 0.25 else 0.0
+        bearing = local + _gauss(rng, math.radians(0.15))
+        elev = elev_world + _gauss(rng, math.radians(0.15))
+        rng_est = dist * (1.0 + _gauss(rng, 0.08)) * (1.0 + _gauss(rng, 0.12 + dist / EO_RANGE_M * 0.2))
+        if not visual:
+            rng_est = 0.0
+        out_c.append(conf); out_b.append(bearing); out_e.append(elev)
+        out_r.append(rng_est); out_v.append(visual)
+    return out_c, out_b, out_e, out_r, out_v
 
 
 def _g_for_maneuver(maneuver: int) -> float:
@@ -298,8 +344,8 @@ def roll_engagement(rng: np.random.Generator, n_steps: int = 200, dt: float = 0.
 
         anom, ib, ie = sample_infrasound(rng, argus_pos, target_pos, speed)
         pl, pr = sample_pressure(rng, argus_pos, argus_heading, target_pos, speed)
-        si, sb, se, srng, slock = sample_swir(rng, argus_pos, target_pos, thermal)
-        ec, eb, ee, erng, evis = sample_eo(rng, argus_pos, target_pos)
+        si, sb, se, srng, slock = sample_swir_pano(rng, argus_pos, argus_heading, target_pos, thermal)
+        ec, eb, ee, erng, evis = sample_eo_pano(rng, argus_pos, argus_heading, target_pos)
 
         rel = target_pos - argus_pos
         rows.append(SensorReading(
@@ -324,40 +370,66 @@ def roll_engagement(rng: np.random.Generator, n_steps: int = 200, dt: float = 0.
     return rows
 
 
-FEATURE_NAMES = [
-    "inf_anomaly", "inf_bearing_sin", "inf_bearing_cos", "inf_elev",
-    "pressure_left", "pressure_right",
-    "swir_intensity", "swir_bearing_sin", "swir_bearing_cos", "swir_elev",
-    "swir_range_norm", "swir_lock",
-    "eo_class_conf", "eo_bearing_sin", "eo_bearing_cos", "eo_elev",
-    "eo_range_norm", "eo_visual",
-]
-INPUT_DIM = len(FEATURE_NAMES)  # 18
+PRESSURE_CHANNELS = ["inf_anomaly", "inf_bearing_sin", "inf_bearing_cos",
+                     "inf_elev", "pressure_left", "pressure_right"]
+SWIR_CHANNELS = ["intensity", "bearing_sin", "bearing_cos",
+                 "elev", "range_norm", "lock"]
+EO_CHANNELS = ["class_conf", "bearing_sin", "bearing_cos",
+               "elev", "range_norm", "visual"]
+PANO_QUADRANT_TAGS = ["F", "R", "B", "L"]
+
+FEATURE_NAMES = list(PRESSURE_CHANNELS)
+for k in PANO_QUADRANT_TAGS:
+    FEATURE_NAMES += [f"swir_{k}_{c}" for c in SWIR_CHANNELS]
+for k in PANO_QUADRANT_TAGS:
+    FEATURE_NAMES += [f"eo_{k}_{c}" for c in EO_CHANNELS]
+INPUT_DIM = len(FEATURE_NAMES)  # 6 + 4*6 + 4*6 = 54
+
+# Slice layout used by model_v2 to reshape into a panoramic strip:
+#   pressure : (T, 6)
+#   swir     : (T, N_CAMS, 6)   ← rendered as a 360° panorama for the CNN
+#   camera   : (T, N_CAMS, 6)
+PRESSURE_SLICE = (0, 6)
+SWIR_SLICE = (6, 6 + N_CAMS * 6)
+EO_SLICE = (SWIR_SLICE[1], SWIR_SLICE[1] + N_CAMS * 6)
+
+
+def _quadrant_features(intensity_list, bearing_list, elev_list,
+                       range_list, gate_list, gate_thresh=0.5):
+    """Pack a single sensor's 4 quadrant readings into a (4, 6) panoramic
+    strip. Bearing is stored as (sin, cos) and zeroed when the quadrant has
+    no valid lock — same convention as the v1 single-EO/SWIR encoding."""
+    out = np.zeros((N_CAMS, 6), dtype=np.float32)
+    for k in range(N_CAMS):
+        gated = gate_list[k] > gate_thresh
+        if gated:
+            sin_b = math.sin(bearing_list[k])
+            cos_b = math.cos(bearing_list[k])
+        else:
+            sin_b, cos_b = 0.0, 1.0
+        out[k, 0] = intensity_list[k]
+        out[k, 1] = sin_b
+        out[k, 2] = cos_b
+        out[k, 3] = elev_list[k]
+        out[k, 4] = range_list[k] / 100000.0
+        out[k, 5] = gate_list[k]
+    return out
 
 
 def reading_to_features(r: SensorReading) -> np.ndarray:
-    # Zero out bearing sin/cos when the sensor has no valid reading,
-    # matching the ml_bridge.gd fix for stale bearings on no-lock frames.
-    swir_sin = math.sin(r.swir_bearing_rad) if r.swir_lock > 0.5 else 0.0
-    swir_cos = math.cos(r.swir_bearing_rad) if r.swir_lock > 0.5 else 1.0
-    eo_sin   = math.sin(r.eo_bearing_rad)   if r.eo_visual > 0.5 else 0.0
-    eo_cos   = math.cos(r.eo_bearing_rad)   if r.eo_visual > 0.5 else 1.0
-    return np.array([
+    pressure = np.array([
         r.inf_anomaly,
         math.sin(r.inf_bearing_rad), math.cos(r.inf_bearing_rad),
         r.inf_elevation_rad,
         r.pressure_left, r.pressure_right,
-        r.swir_intensity,
-        swir_sin, swir_cos,
-        r.swir_elevation_rad,
-        r.swir_range_m / 100000.0,
-        r.swir_lock,
-        r.eo_class_conf,
-        eo_sin, eo_cos,
-        r.eo_elevation_rad,
-        r.eo_range_m / 100000.0,
-        r.eo_visual,
     ], dtype=np.float32)
+    swir_pano = _quadrant_features(r.swir_intensity, r.swir_bearing_rad,
+                                   r.swir_elevation_rad, r.swir_range_m,
+                                   r.swir_lock).reshape(-1)
+    eo_pano = _quadrant_features(r.eo_class_conf, r.eo_bearing_rad,
+                                 r.eo_elevation_rad, r.eo_range_m,
+                                 r.eo_visual).reshape(-1)
+    return np.concatenate([pressure, swir_pano, eo_pano]).astype(np.float32)
 
 
 def reading_to_labels(r: SensorReading) -> np.ndarray:

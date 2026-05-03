@@ -11,29 +11,19 @@ extends Camera3D
 @export var orbit_speed: float = 0.04
 
 var _t: float = 0.0
-var _mode: int = 0
-var _c_prev: bool = false
 var controller: SimController
 var argus: Node3D
 var hcm: Node3D
 
 func _ready() -> void:
-	controller = get_node_or_null(controller_path) as SimController
-	argus = get_node_or_null(argus_path) as Node3D
-	hcm = get_node_or_null(hcm_path) as Node3D
-	make_current()
+	controller = get_node(controller_path) as SimController
+	argus = get_node(argus_path) as Node3D
+	hcm = get_node(hcm_path) as Node3D
 
 func _process(delta: float) -> void:
-	# Manual edge-detect on KEY_C — avoids action-map matching quirks.
-	var c_now: bool = Input.is_key_pressed(KEY_C)
-	if c_now and not _c_prev:
-		_mode = (_mode + 1) % 3
-		if controller:
-			controller._camera_mode = _mode
-	_c_prev = c_now
-
 	_t += delta * orbit_speed
-	match _mode:
+	var mode := controller.camera_mode() if controller else 0
+	match mode:
 		1:
 			if argus:
 				global_transform.origin = argus.position + Vector3(40, 25, 40)

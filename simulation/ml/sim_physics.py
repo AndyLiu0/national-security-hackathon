@@ -21,6 +21,14 @@ INFRASOUND_RANGE_M = 220000.0
 SWIR_RANGE_M = 90000.0
 EO_RANGE_M = 45000.0
 
+# ---- 5-mode evasion constants (mirror of hcm_target.gd) ----
+LATERAL_G = 6.0
+MANEUVER_CRUISE     = 0
+MANEUVER_S_TURN     = 1
+MANEUVER_JINK       = 2
+MANEUVER_DIVE       = 3
+MANEUVER_CLIMB_DASH = 4
+
 
 @dataclass
 class SensorReading:
@@ -77,12 +85,8 @@ def sample_pressure(rng, argus_pos, argus_heading_rad, target_pos, target_speed)
 def sample_infrasound(rng, argus_pos, target_pos, target_speed):
     rel = target_pos - argus_pos
     dist = float(np.linalg.norm(rel))
-    # Quadratic range falloff so the signal actually varies with distance
-    # instead of saturating at every supersonic target.
     range_factor = max(0.0, 1.0 - dist / INFRASOUND_RANGE_M) ** 1.8
     mach = max(target_speed, 1.0) / 340.0
-    # Soft saturating function in mach. mach=1 -> 0.04, mach=5 -> 0.5,
-    # mach=8 -> 0.65.  Captures "louder when faster" without pinning at 1.
     shock = 1.0 - math.exp(-(mach * mach) / 90.0)
     raw = range_factor * shock + _gauss(rng, 0.04)
     anomaly = max(0.0, min(1.0, raw))
@@ -130,6 +134,56 @@ def sample_eo(rng, argus_pos, target_pos, night_factor=1.0):
     return conf, bearing, elev, rng_est, visual
 
 
+def _g_for_maneuver(maneuver: int) -> float:
+    if maneuver == MANEUVER_CRUISE:     return LATERAL_G * 0.35
+    if maneuver == MANEUVER_S_TURN:     return LATERAL_G * 0.75
+    if maneuver == MANEUVER_JINK:       return LATERAL_G * 1.45
+    if maneuver == MANEUVER_DIVE:       return LATERAL_G * 0.55
+    if maneuver == MANEUVER_CLIMB_DASH: return LATERAL_G * 0.50
+    return LATERAL_G
+
+
+def _pick_maneuver(rng, alt_min, alt_max):
+    """Returns (maneuver_id, state_dict) matching hcm_target.gd _pick_maneuver."""
+    r = float(rng.random())
+    if r < 0.15:
+        return MANEUVER_CRUISE, {
+            "lateral_bias":  float(rng.uniform(-0.25, 0.25)),
+            "timer":         float(rng.uniform(4.0, 8.0)),
+            "target_alt":    None,
+        }
+    elif r < 0.40:
+        return MANEUVER_S_TURN, {
+            "lateral_bias": 0.0,
+            "s_phase":      float(rng.uniform(0.0, 2 * math.pi)),
+            "s_freq":       float(rng.uniform(0.35, 0.75)),
+            "s_amp":        float(rng.uniform(0.65, 1.0)),
+            "timer":        float(rng.uniform(8.0, 18.0)),
+            "target_alt":   None,
+        }
+    elif r < 0.62:
+        sign = 1.0 if rng.random() > 0.5 else -1.0
+        return MANEUVER_JINK, {
+            "lateral_bias":    sign * float(rng.uniform(0.8, 1.0)),
+            "jink_remaining":  int(rng.integers(3, 7)),
+            "jink_subtimer":   0.0,
+            "timer":           float(rng.uniform(5.0, 9.0)),
+            "target_alt":      None,
+        }
+    elif r < 0.80:
+        return MANEUVER_DIVE, {
+            "lateral_bias": float(rng.uniform(-0.45, 0.45)),
+            "timer":        float(rng.uniform(6.0, 12.0)),
+            "target_alt":   float(alt_min + rng.uniform(0.0, 3000.0)),
+        }
+    else:
+        return MANEUVER_CLIMB_DASH, {
+            "lateral_bias": float(rng.uniform(-0.35, 0.35)),
+            "timer":        float(rng.uniform(5.0, 9.0)),
+            "target_alt":   float(alt_max - rng.uniform(0.0, 3000.0)),
+        }
+
+
 def roll_engagement(rng: np.random.Generator, n_steps: int = 200, dt: float = 0.1):
     """One ARGUS-vs-HCM scenario; yields per-tick SensorReading rows."""
     # ARGUS loiter
@@ -137,22 +191,27 @@ def roll_engagement(rng: np.random.Generator, n_steps: int = 200, dt: float = 0.
     argus_radius = rng.uniform(8000.0, 14000.0)
     argus_phase = rng.uniform(0.0, 2 * math.pi)
 
-    # HCM start
-    is_target = rng.random() < 0.75  # 25% are noise/no-target scenarios
+    # HCM start — fixed cruise speed to match Godot sim
+    is_target = rng.random() < 0.75
     if is_target:
         start_dist = rng.uniform(60000.0, 110000.0)
         bearing = rng.uniform(0.0, 2 * math.pi)
+        speed = HCM_CRUISE_MPS
         target_pos = np.array([
             math.cos(bearing) * start_dist,
             rng.uniform(HCM_ALT_MIN_M, HCM_ALT_MAX_M),
             math.sin(bearing) * start_dist,
         ])
         heading = math.atan2(-target_pos[2], -target_pos[0]) + rng.uniform(-0.4, 0.4)
-        speed = rng.uniform(1200.0, 2200.0)
         velocity = np.array([math.cos(heading) * speed, 0.0, math.sin(heading) * speed])
         target_alt_setpoint = rng.uniform(HCM_ALT_MIN_M, HCM_ALT_MAX_M)
+
+        # 5-mode evasion state (mirrors hcm_target.gd)
+        maneuver, mv_state = _pick_maneuver(rng, HCM_ALT_MIN_M, HCM_ALT_MAX_M)
+        if mv_state["target_alt"] is not None:
+            target_alt_setpoint = mv_state["target_alt"]
     else:
-        # Decoy: slow, distant, weak thermal — what the model should NOT lock onto.
+        # Decoy: slow, distant, weak thermal.
         start_dist = rng.uniform(30000.0, 200000.0)
         bearing = rng.uniform(0.0, 2 * math.pi)
         target_pos = np.array([
@@ -163,36 +222,78 @@ def roll_engagement(rng: np.random.Generator, n_steps: int = 200, dt: float = 0.
         speed = rng.uniform(80.0, 320.0)
         heading = rng.uniform(0.0, 2 * math.pi)
         velocity = np.array([math.cos(heading) * speed, 0.0, math.sin(heading) * speed])
-        target_alt_setpoint = target_pos[1]
+        target_alt_setpoint = float(target_pos[1])
+        maneuver, mv_state = MANEUVER_CRUISE, {"lateral_bias": 0.0, "timer": 1e9, "target_alt": None}
 
     rows = []
-    for step in range(n_steps):
+    for _ in range(n_steps):
         argus_phase += (ARGUS_CRUISE_MPS / argus_radius) * dt
         argus_pos = np.array([
             math.cos(argus_phase) * argus_radius,
             argus_alt,
             math.sin(argus_phase) * argus_radius,
         ])
-        # Tangent to the loiter circle = glider heading.
         argus_heading = argus_phase + math.pi / 2.0
 
-        # propagate target with light evasion
-        if is_target and step % 45 == 0:
-            heading += rng.uniform(-0.6, 0.6)
-            target_alt_setpoint = float(np.clip(
-                target_alt_setpoint + rng.uniform(-1500, 1500),
-                HCM_ALT_MIN_M, HCM_ALT_MAX_M))
-        velocity[0] = math.cos(heading) * speed
-        velocity[2] = math.sin(heading) * speed
-        velocity[1] = float(np.clip((target_alt_setpoint - target_pos[1]) * 0.15, -180, 180))
-        target_pos = target_pos + velocity * dt
-
-        # signatures
         if is_target:
-            thermal = (speed / HCM_CRUISE_MPS) ** 3
-            blackout = 1.0 if (speed > 1500.0 and rng.random() < 0.25) else 0.0
+            # ---- evasion timer ----
+            mv_state["timer"] -= dt
+            if mv_state["timer"] <= 0.0:
+                maneuver, mv_state = _pick_maneuver(rng, HCM_ALT_MIN_M, HCM_ALT_MAX_M)
+                if mv_state["target_alt"] is not None:
+                    target_alt_setpoint = mv_state["target_alt"]
+
+            # ---- per-mode update ----
+            if maneuver == MANEUVER_S_TURN:
+                mv_state["s_phase"] += mv_state["s_freq"] * dt
+                mv_state["lateral_bias"] = math.sin(mv_state["s_phase"]) * mv_state["s_amp"]
+
+            elif maneuver == MANEUVER_JINK:
+                mv_state["jink_subtimer"] -= dt
+                if mv_state["jink_subtimer"] <= 0.0:
+                    if mv_state["jink_remaining"] > 0:
+                        mv_state["lateral_bias"]   = -mv_state["lateral_bias"]
+                        mv_state["jink_subtimer"]  = float(rng.uniform(0.7, 1.4))
+                        mv_state["jink_remaining"] -= 1
+                    else:
+                        mv_state["lateral_bias"] = 0.0
+
+            elif maneuver == MANEUVER_DIVE:
+                # proportional altitude controller toward floor target
+                target_alt_setpoint = max(
+                    HCM_ALT_MIN_M,
+                    target_alt_setpoint - 400.0 * dt * max(0.0, target_alt_setpoint - HCM_ALT_MIN_M) / max(HCM_ALT_MAX_M - HCM_ALT_MIN_M, 1.0)
+                )
+
+            elif maneuver == MANEUVER_CLIMB_DASH:
+                target_alt_setpoint = min(
+                    HCM_ALT_MAX_M,
+                    target_alt_setpoint + 300.0 * dt * max(0.0, HCM_ALT_MAX_M - target_alt_setpoint) / max(HCM_ALT_MAX_M - HCM_ALT_MIN_M, 1.0)
+                )
+
+            # ---- kinematics (mirror of _step_kinematics) ----
+            g_eff = _g_for_maneuver(maneuver)
+            accel = g_eff * 9.81 * mv_state["lateral_bias"]
+            heading += (accel / max(speed, 1.0)) * dt
+
+            v_cap = 480.0 if maneuver == MANEUVER_DIVE else 200.0
+            alt_err = target_alt_setpoint - target_pos[1]
+            vy = max(-v_cap, min(v_cap, alt_err * 0.22))
+            velocity = np.array([math.cos(heading) * speed, vy, math.sin(heading) * speed])
+            target_pos = target_pos + velocity * dt
+            target_pos[1] = max(HCM_ALT_MIN_M * 0.5, target_pos[1])  # soft floor
+
+            thermal = (speed / HCM_CRUISE_MPS) ** 3  # = 1.0 at cruise
+            blackout = 1.0 if (speed > 1500.0 and abs(mv_state["lateral_bias"]) > 0.55) else 0.0
         else:
-            thermal = rng.uniform(0.02, 0.15)  # background sources / weak emitter
+            # Decoy: simple straight flight with slow heading drift
+            if _ % 60 == 0:
+                heading += float(rng.uniform(-0.3, 0.3))
+            velocity[0] = math.cos(heading) * speed
+            velocity[2] = math.sin(heading) * speed
+            velocity[1] = max(-50.0, min(50.0, (target_alt_setpoint - target_pos[1]) * 0.1))
+            target_pos = target_pos + velocity * dt
+            thermal = rng.uniform(0.02, 0.15)
             blackout = 0.0
 
         anom, ib, ie = sample_infrasound(rng, argus_pos, target_pos, speed)
@@ -235,18 +336,24 @@ INPUT_DIM = len(FEATURE_NAMES)  # 18
 
 
 def reading_to_features(r: SensorReading) -> np.ndarray:
+    # Zero out bearing sin/cos when the sensor has no valid reading,
+    # matching the ml_bridge.gd fix for stale bearings on no-lock frames.
+    swir_sin = math.sin(r.swir_bearing_rad) if r.swir_lock > 0.5 else 0.0
+    swir_cos = math.cos(r.swir_bearing_rad) if r.swir_lock > 0.5 else 1.0
+    eo_sin   = math.sin(r.eo_bearing_rad)   if r.eo_visual > 0.5 else 0.0
+    eo_cos   = math.cos(r.eo_bearing_rad)   if r.eo_visual > 0.5 else 1.0
     return np.array([
         r.inf_anomaly,
         math.sin(r.inf_bearing_rad), math.cos(r.inf_bearing_rad),
         r.inf_elevation_rad,
         r.pressure_left, r.pressure_right,
         r.swir_intensity,
-        math.sin(r.swir_bearing_rad), math.cos(r.swir_bearing_rad),
+        swir_sin, swir_cos,
         r.swir_elevation_rad,
         r.swir_range_m / 100000.0,
         r.swir_lock,
         r.eo_class_conf,
-        math.sin(r.eo_bearing_rad), math.cos(r.eo_bearing_rad),
+        eo_sin, eo_cos,
         r.eo_elevation_rad,
         r.eo_range_m / 100000.0,
         r.eo_visual,

@@ -54,18 +54,24 @@ func query(infrasound: SensorInfrasound,
 		   swir: SensorSWIR,
 		   eo: SensorEO) -> void:
 	# Feature order MUST match sim_physics.FEATURE_NAMES.
+	# Zero bearing sin/cos when sensor has no valid reading — matches training
+	# data convention where no-lock frames always have sin=0, cos=1.
+	var swir_sin := sin(swir.bearing_rad) if swir.has_lock else 0.0
+	var swir_cos := cos(swir.bearing_rad) if swir.has_lock else 1.0
+	var eo_sin   := sin(eo.bearing_rad)   if eo.has_visual else 0.0
+	var eo_cos   := cos(eo.bearing_rad)   if eo.has_visual else 1.0
 	var feats: Array = [
 		infrasound.anomaly_score,
 		sin(infrasound.bearing_rad), cos(infrasound.bearing_rad),
 		infrasound.elevation_rad,
 		pressure.left_dp, pressure.right_dp,
 		swir.thermal_intensity,
-		sin(swir.bearing_rad), cos(swir.bearing_rad),
+		swir_sin, swir_cos,
 		swir.elevation_rad,
 		swir.range_estimate_m / 100000.0,
 		1.0 if swir.has_lock else 0.0,
 		eo.classification_conf,
-		sin(eo.bearing_rad), cos(eo.bearing_rad),
+		eo_sin, eo_cos,
 		eo.elevation_rad,
 		eo.range_estimate_m / 100000.0,
 		1.0 if eo.has_visual else 0.0,

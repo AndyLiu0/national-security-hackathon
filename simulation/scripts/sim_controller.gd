@@ -28,8 +28,8 @@ const MLBridgeScript = preload("res://scripts/ml_bridge.gd")
 const SensorPressureScript = preload("res://scripts/sensor_pressure.gd")
 var ml_bridge: Node
 
-@export var enable_ml_bridge: bool = false
-@export var ml_query_period_s: float = 0.2
+@export var enable_ml_bridge: bool = true
+@export var ml_query_period_s: float = 0.1
 var _ml_query_accum: float = 0.0
 
 var truth_marker: Node3D
@@ -116,7 +116,7 @@ func _physics_process(delta: float) -> void:
 			_ml_query_accum = 0.0
 			ml_bridge.query(infrasound, pressure, swir, eo)
 
-	_step_prediction(delta)
+	# _step_prediction(delta)  # synthetic OU prediction — deactivated; kept for comparison
 	_update_markers()
 	_handle_input()
 
@@ -149,11 +149,18 @@ func _update_markers() -> void:
 		truth_marker.visible = _show_truth
 		truth_marker.position = hcm.truth_position_m / SimConstants.RENDER_SCALE
 	if estimate_marker:
-		estimate_marker.visible = true
-		estimate_marker.global_position = predicted_pos_world / SimConstants.RENDER_SCALE
-		if predicted_vel_world.length() > 1.0:
-			var aim: Vector3 = estimate_marker.global_position + predicted_vel_world.normalized()
-			estimate_marker.look_at(aim, Vector3.UP)
+		# Show ML bridge predicted position (first trajectory waypoint).
+		# Falls back to hidden when no prediction is available yet.
+		var bridge := ml_bridge as MLBridge
+		var has_ml := bridge != null and bridge.last_trajectory_pos.size() > 0
+		estimate_marker.visible = has_ml
+		if has_ml:
+			var ml_world := argus.truth_position_m + bridge.last_trajectory_pos[0]
+			estimate_marker.global_position = ml_world / SimConstants.RENDER_SCALE
+			if bridge.last_trajectory_vel.size() > 0:
+				var vel := bridge.last_trajectory_vel[0]
+				if vel.length() > 1.0:
+					estimate_marker.look_at(estimate_marker.global_position + vel.normalized(), Vector3.UP)
 
 func _handle_input() -> void:
 	if Input.is_action_just_pressed("reset_sim"):
@@ -161,8 +168,7 @@ func _handle_input() -> void:
 		fusion.reset()
 	if Input.is_action_just_pressed("toggle_truth"):
 		_show_truth = not _show_truth
-	if Input.is_action_just_pressed("camera_cycle"):
-		_camera_mode = (_camera_mode + 1) % 3
+
 
 func camera_mode() -> int:
 	return _camera_mode

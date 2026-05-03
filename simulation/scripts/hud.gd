@@ -38,6 +38,8 @@ var ir_rect: TextureRect
 var eo_label: Label
 var ir_label: Label
 
+var _c_prev: bool = false
+
 func bind(controller: SimController) -> void:
 	sim = controller
 
@@ -98,6 +100,10 @@ func _make_label(text: String, parent: Control) -> Label:
 
 func _process(delta: float) -> void:
 	_t += delta
+	var c_now := Input.is_key_pressed(KEY_C)
+	if c_now and not _c_prev and sim:
+		sim._camera_mode = (sim._camera_mode + 1) % 3
+	_c_prev = c_now
 	if sim:
 		_trail_acc += delta
 		if _trail_acc >= _TRAIL_DT:

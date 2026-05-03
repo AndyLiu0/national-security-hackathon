@@ -289,7 +289,7 @@ mesh = SubResource("m_hcm_exhaust")
 surface_material_override/0 = SubResource("mat_hcm_exhaust")
 
 [node name="cone" type="MeshInstance3D" parent="HCM" unique_id=1095200693]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.102, 22.537)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 14.1)
 mesh = SubResource("CylinderMesh_ya4ey")
 
 [node name="ExhaustLight" type="OmniLight3D" parent="HCM"]

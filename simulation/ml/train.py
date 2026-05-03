@@ -62,7 +62,8 @@ def main():
     seq_len = int(z["seq_len"])
     horizon = int(z["horizon"])
     pos_norm = float(z["pos_norm_m"])
-    print(f"data: X={X.shape} traj={Ytraj.shape} pos_norm={pos_norm}")
+    vel_norm = float(z["vel_norm_mps"])
+    print(f"data: X={X.shape} traj={Ytraj.shape} pos_norm={pos_norm} vel_norm={vel_norm}")
 
     # Per-feature standardization (computed over all timesteps).
     flat = X.reshape(-1, X.shape[-1])
@@ -146,6 +147,7 @@ def main():
         "seq_len": seq_len,
         "horizon": horizon,
         "pos_norm_m": pos_norm,
+        "vel_norm_mps": vel_norm,
     }, out)
     print(f"saved {out}")
 

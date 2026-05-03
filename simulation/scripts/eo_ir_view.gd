@@ -2,18 +2,19 @@ extends Node3D
 class_name EOIRView
 
 # ---------------------------------------------------------------------------
-# 360° camera ring mounted to the glider. Auto-discovers the four EO and
-# four IR Camera3D children inside the SubViewports under this node and
-# parks them at fixed yaws (Forward / Starboard / Aft / Port) relative to
-# the glider's heading. Together they cover full azimuth so an HCM can be
-# spotted from any side. The transformer fuses everything; these viewports
-# are visualization only.
+# 360° camera ring mounted to the glider. Four EO + four IR cameras, each
+# offset from the glider belly in a different compass direction (F/R/B/L)
+# and aimed at the HCM. This gives the transformer four distinct viewing
+# angles of the same target while keeping every feed useful in the HUD.
 # ---------------------------------------------------------------------------
 
 @export var hcm_path: NodePath
 @export var argus_path: NodePath
 
-# yaws in radians, applied AFTER aligning to argus heading. 0 = forward.
+# Spacing between camera positions in render units (~1.25 km each).
+const OFFSET_R: float = 5.0
+
+# yaw offsets relative to argus heading: forward, starboard, aft, port.
 const YAWS := [0.0, PI / 2.0, PI, -PI / 2.0]
 const TAGS := ["F", "R", "B", "L"]
 
@@ -36,19 +37,17 @@ func _ready() -> void:
 			if c: ir_cams.append(c)
 
 func _process(_dt: float) -> void:
-	if argus == null:
+	if hcm == null or argus == null:
 		return
-	var origin := argus.global_position + Vector3(0, -0.5, 0)
-	var heading: float = 0.0
-	if argus.has_method("get") and "heading_rad" in argus:
-		heading = argus.heading_rad
+	var heading: float = argus.heading_rad if "heading_rad" in argus else 0.0
+	var aim := hcm.global_position
 	for i in YAWS.size():
 		var yaw: float = heading + YAWS[i]
-		var fwd := Vector3(cos(yaw), 0.0, sin(yaw))
-		var aim := origin + fwd
-		if i < eo_cams.size():
-			eo_cams[i].global_position = origin
-			eo_cams[i].look_at(aim, Vector3.UP)
-		if i < ir_cams.size():
-			ir_cams[i].global_position = origin
-			ir_cams[i].look_at(aim, Vector3.UP)
+		var cam_pos := argus.global_position + Vector3(cos(yaw), -0.5, sin(yaw)) * OFFSET_R
+		if (aim - cam_pos).length() > 0.5:
+			if i < eo_cams.size():
+				eo_cams[i].global_position = cam_pos
+				eo_cams[i].look_at(aim, Vector3.UP)
+			if i < ir_cams.size():
+				ir_cams[i].global_position = cam_pos
+				ir_cams[i].look_at(aim, Vector3.UP)

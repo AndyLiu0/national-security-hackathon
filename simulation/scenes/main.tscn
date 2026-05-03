@@ -312,7 +312,7 @@ argus_path = NodePath("../Argus")
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="EOCamera_F" type="Camera3D" parent="GimbalView/EOViewport_F"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 cull_mask = 1
@@ -321,7 +321,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="EOCamera_R" type="Camera3D" parent="GimbalView/EOViewport_R"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 cull_mask = 1
@@ -330,7 +330,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="EOCamera_B" type="Camera3D" parent="GimbalView/EOViewport_B"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 cull_mask = 1
@@ -339,7 +339,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="EOCamera_L" type="Camera3D" parent="GimbalView/EOViewport_L"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 cull_mask = 1
@@ -349,7 +349,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="IRCamera_F" type="Camera3D" parent="GimbalView/IRViewport_F"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 environment = SubResource("env_ir")
@@ -359,7 +359,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="IRCamera_R" type="Camera3D" parent="GimbalView/IRViewport_R"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 environment = SubResource("env_ir")
@@ -369,7 +369,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="IRCamera_B" type="Camera3D" parent="GimbalView/IRViewport_B"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 environment = SubResource("env_ir")
@@ -379,7 +379,7 @@ cull_mask = 1
 size = Vector2i(160, 110)
 render_target_update_mode = 4
 [node name="IRCamera_L" type="Camera3D" parent="GimbalView/IRViewport_L"]
-fov = 100.0
+fov = 22.0
 near = 0.05
 far = 4000.0
 environment = SubResource("env_ir")

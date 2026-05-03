@@ -91,7 +91,6 @@ func _physics_process(delta: float) -> void:
 			ml_bridge.query(infrasound, swir, eo)
 
 	_update_markers()
-	_handle_input()
 
 func _update_markers() -> void:
 	if truth_marker:
@@ -102,14 +101,12 @@ func _update_markers() -> void:
 		if fusion.has_estimate:
 			estimate_marker.position = fusion.estimated_position_m / SimConstants.RENDER_SCALE
 
-func _handle_input() -> void:
-	if Input.is_action_just_pressed("reset_sim"):
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("reset_sim"):
 		hcm.reset_track()
 		fusion.reset()
-	if Input.is_action_just_pressed("toggle_truth"):
+	elif event.is_action_pressed("toggle_truth"):
 		_show_truth = not _show_truth
-	if Input.is_action_just_pressed("camera_cycle"):
-		_camera_mode = (_camera_mode + 1) % 3
 
 func camera_mode() -> int:
 	return _camera_mode

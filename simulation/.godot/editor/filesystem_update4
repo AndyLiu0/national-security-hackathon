@@ -13,3 +13,4 @@ res://scripts/sensor_infrasound.gd
 res://scripts/sensor_swir.gd
 res://scripts/sim_constants.gd
 res://scripts/sim_controller.gd
+res://scripts/fire_cone.gdshader

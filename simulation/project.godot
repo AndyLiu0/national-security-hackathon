@@ -41,6 +41,11 @@ camera_cycle={
 ]
 }
 
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
 [rendering]
 
+rendering_device/driver.windows="d3d12"
 environment/defaults/default_clear_color=Color(0.02, 0.04, 0.08, 1)

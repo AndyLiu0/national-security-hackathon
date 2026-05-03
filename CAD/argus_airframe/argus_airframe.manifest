@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "script",
+    "author": "Project ARGUS",
+    "description": {
+        "": {
+            "name": "ARGUS Airframe",
+            "description": "Builds the ARGUS stratospheric solar-glider as a Fusion assembly."
+        }
+    },
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}
